@@ -15,7 +15,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.replicate.delivery",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
     ],
+    domains: ['bflapistorage.blob.core.windows.net'],
   },
 };
 

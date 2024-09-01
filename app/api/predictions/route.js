@@ -19,28 +19,30 @@ const WEBHOOK_HOST = process.env.VERCEL_URL
 
 export async function POST(request) {
   if (!process.env.REPLICATE_API_TOKEN) {
-    throw new Error(
-      'The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it.'
+    return NextResponse.json({ detail: 'REPLICATE_API_TOKEN is not set' }, { status: 500 });
+  }
+
+  try {
+    const { prompt } = await request.json();
+
+    const response = await replicate.run(
+      "black-forest-labs/flux-schnell",
+      {
+        input: {
+          prompt: prompt
+        }
+      }
     );
+
+    // The response is now an array of image URLs
+    if (!response || response.length === 0) {
+      return NextResponse.json({ detail: 'No images generated' }, { status: 500 });
+    }
+
+    // Return the first image URL (or you could return all of them)
+    return NextResponse.json({ image: response[0] }, { status: 201 });
+  } catch (error) {
+    console.error('Error:', error);
+    return NextResponse.json({ detail: error.message || 'An error occurred' }, { status: 500 });
   }
-
-  const { prompt } = await request.json();
-
-  const options = {
-    version: '8beff3369e81422112d93b89ca01426147de542cd4684c244b673b105188fe5f',
-    input: { prompt }
-  }
-
-  if (WEBHOOK_HOST) {
-    options.webhook = `${WEBHOOK_HOST}/api/webhooks`
-    options.webhook_events_filter = ["start", "completed"]
-  }
-
-  const prediction = await replicate.predictions.create(options);
-
-  if (prediction?.error) {
-    return NextResponse.json({ detail: prediction.error }, { status: 500 });
-  }
-
-  return NextResponse.json(prediction, { status: 201 });
 }
