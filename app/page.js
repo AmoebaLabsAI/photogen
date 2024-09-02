@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 
@@ -93,8 +94,8 @@ export default function LandingPage() {
             <div key={index} className="bg-white text-black p-6 rounded-lg shadow-md">
               <h3 className="text-2xl font-bold mb-4">{topic.name}</h3>
               <div className="flex justify-between space-x-4">
-                <img src={topic.img1} alt={`${topic.name} 1`} className="w-1/2 h-auto rounded-lg" />
-                <img src={topic.img2} alt={`${topic.name} 2`} className="w-1/2 h-auto rounded-lg" />
+                <Image src={topic.img1} alt={`${topic.name} 1`} width={150} height={150} className="w-1/2 h-auto rounded-lg" />
+                <Image src={topic.img2} alt={`${topic.name} 2`} width={150} height={150} className="w-1/2 h-auto rounded-lg" />
               </div>
             </div>
           ))}
@@ -105,7 +106,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-5 flex flex-col md:flex-row justify-between items-center">
           <p className="mb-4 md:mb-0">An Amoeba Labs Experiment</p>
           <p className="text-sm italic max-w-md text-center md:text-right">
-            "Knowledge is knowing that Frankenstein is not the monster. Wisdom is knowing that he is."
+            &ldquo;Knowledge is knowing that Frankenstein is not the monster. Wisdom is knowing that he is.&rdquo;
           </p>
         </div>
       </footer>
