@@ -1,0 +1,49 @@
+.carousel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: 33.33vh;
+    /* Each row takes up a third of the viewport height */
+    gap: 10px;
+    /* Space between grid items */
+    width: 100%;
+    height: 100vh;
+    /* Full viewport height */
+    padding: 10px;
+    /* Optional padding around the grid */
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    animation: slideInOut 10s linear infinite;
+    /* Animation for sliding in and out */
+}
+
+.carousel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Maintain aspect ratio and cover the container */
+}
+
+@keyframes slideInOut {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    25% {
+        transform: translateX(0);
+    }
+
+    75% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
