@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import { generateFluxProImage } from '../../actions/replicate-actions';
 import Image from 'next/image';
 
-const FluxProPage: React.FC = () => {
+const FluxProPage = () => {
     const [prompt, setPrompt] = useState('');
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [imageUrls, setImageUrls] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         try {
@@ -21,7 +21,7 @@ const FluxProPage: React.FC = () => {
         setIsLoading(false);
     };
 
-    const handleDownload = (url: string) => {
+    const handleDownload = (url) => {
         const link = document.createElement('a');
         link.href = url;
         link.download = 'flux-pro-image.webp';

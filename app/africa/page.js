@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState } from 'react';
-import { generateLightningImage } from '../../actions/replicate-actions';
+import { generateAfricaImage } from '../../actions/replicate-actions';
 import Image from 'next/image';
 
-const LightningPage: React.FC = () => {
+const AfricaPage = () => {
     const [prompt, setPrompt] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const result = await generateLightningImage(prompt);
+            const result = await generateAfricaImage(prompt);
             setImageUrl(result[0]); // Use the first element of the result as the image URL
         } catch (error) {
             console.error('Error generating image:', error);
@@ -25,7 +25,7 @@ const LightningPage: React.FC = () => {
         if (imageUrl) {
             const link = document.createElement('a');
             link.href = imageUrl;
-            link.download = 'lightning-image.png';
+            link.download = 'africa-image.png';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -34,7 +34,7 @@ const LightningPage: React.FC = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8">Lightning Image Generator</h1>
+            <h1 className="text-4xl font-bold mb-8">Africa Image Generator</h1>
             <form onSubmit={handleSubmit} className="mb-8">
                 <input
                     type="text"
@@ -46,7 +46,7 @@ const LightningPage: React.FC = () => {
                 />
                 <button
                     type="submit"
-                    className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors"
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
                     disabled={isLoading}
                 >
                     {isLoading ? 'Generating...' : 'Generate Image'}
@@ -78,4 +78,4 @@ const LightningPage: React.FC = () => {
     );
 };
 
-export default LightningPage;
+export default AfricaPage;
