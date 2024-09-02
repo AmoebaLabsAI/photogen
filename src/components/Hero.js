@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import '../styles/Hero.css'; // Corrected import path
+import React, { useState, useMemo } from 'react';
+import '../styles/Hero.css';
 
 const Hero = () => {
     const images = [
@@ -34,58 +34,49 @@ const Hero = () => {
         '/images/out-0 (28).webp',
     ];
 
-    // Create an 8x8 grid by repeating and slicing the images
-    const gridImages = Array(128).fill().map((_, i) => images[i % images.length]);
+    const imagesPerColumn = 1000; // Increased to 1000 images per column
 
-    const [highlightedIndex, setHighlightedIndex] = useState(null);
-    const carouselRef = useRef(null);
+    const columns = useMemo(() => {
+        const usedDurations = new Set();
 
-    useEffect(() => {
-        const carousel = carouselRef.current;
-        let animationId;
-
-        const animate = () => {
-            carousel.scrollTop += 1;
-            if (carousel.scrollTop >= carousel.scrollHeight / 2) {
-                carousel.scrollTop = 0;
+        return Array(8).fill().map((_, colIndex) => {
+            const columnImages = [];
+            for (let i = 0; i < imagesPerColumn; i++) {
+                columnImages.push(images[(colIndex + i) % images.length]);
             }
-            animationId = requestAnimationFrame(animate);
-        };
 
-        animationId = requestAnimationFrame(animate);
+            let randomDuration;
+            do {
+                // Adjusted duration range: 900 to 1800 seconds (15 to 30 minutes)
+                randomDuration = Math.floor(Math.random() * (1800 - 900 + 1) + 900);
+            } while (usedDurations.has(randomDuration));
 
-        return () => {
-            cancelAnimationFrame(animationId);
-        };
+            usedDurations.add(randomDuration);
+            return { images: columnImages, duration: randomDuration };
+        });
     }, []);
+
+    const [highlightedCell, setHighlightedCell] = useState(null);
 
     return (
         <div className="hero">
-            <div className="carousel" ref={carouselRef}>
-                <div className="carousel-content">
-                    {gridImages.map((image, index) => (
-                        <div
-                            key={index}
-                            className={`carousel-item ${index === highlightedIndex ? 'highlighted' : ''}`}
-                            onMouseEnter={() => setHighlightedIndex(index)}
-                            onMouseLeave={() => setHighlightedIndex(null)}
-                        >
-                            <img src={image} alt={`Slide ${index}`} />
+            <div className="carousel">
+                {columns.map((column, colIndex) => (
+                    <div key={colIndex} className={`carousel-column ${colIndex % 2 === 0 ? 'down' : 'up'}`}>
+                        <div className="column-content" style={{ animationDuration: `${column.duration}s` }}>
+                            {column.images.map((image, rowIndex) => (
+                                <div
+                                    key={rowIndex}
+                                    className={`carousel-item ${highlightedCell === `${colIndex}-${rowIndex}` ? 'highlighted' : ''}`}
+                                    onMouseEnter={() => setHighlightedCell(`${colIndex}-${rowIndex}`)}
+                                    onMouseLeave={() => setHighlightedCell(null)}
+                                >
+                                    <img src={image} alt={`Slide ${colIndex}-${rowIndex}`} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
-                <div className="carousel-content">
-                    {gridImages.map((image, index) => (
-                        <div
-                            key={index + gridImages.length}
-                            className={`carousel-item ${index + gridImages.length === highlightedIndex ? 'highlighted' : ''}`}
-                            onMouseEnter={() => setHighlightedIndex(index + gridImages.length)}
-                            onMouseLeave={() => setHighlightedIndex(null)}
-                        >
-                            <img src={image} alt={`Slide ${index}`} />
-                        </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
             </div>
         </div>
     );
