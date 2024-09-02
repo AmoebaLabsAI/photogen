@@ -6,7 +6,7 @@ export default function LandingPage() {
       <h1 className="text-4xl font-bold text-center mb-8">Welcome to Flux AI</h1>
       <p className="text-xl mb-6">
         Flux AI is your gateway to creating stunning photos using artificial intelligence.
-        Whether you're an artist, designer, or just someone with a vivid imagination,
+        Whether you are an artist, designer, or just someone with a vivid imagination,
         Flux AI turns your ideas into visual reality.
       </p>
       <div className="flex justify-center gap-4">
