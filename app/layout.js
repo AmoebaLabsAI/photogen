@@ -11,10 +11,7 @@ export default function RootLayout({
       <body>
         <nav className="bg-gray-800 text-white p-4">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="text-xl font-bold">Flux AI</Link>
-            <div className="space-x-4">
-              <Link href="/flux">Flux Schnell</Link>
-            </div>
+            <Link href="/" className="text-xl font-bold">PhotoGen | An Amoeba Labs Project</Link>
           </div>
         </nav>
         {children}
