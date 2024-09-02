@@ -105,7 +105,7 @@ export default function LandingPage() {
                 Welcome to Flux AI
               </h1>
               <p className="text-lg md:text-xl mb-6 text-gray-200 shadow-text">
-                Flux AI is your gateway to creating stunning photos using
+                PhotoGen is your gateway to creating stunning photos using
                 artificial intelligence. Choose from our various models to turn
                 your ideas into visual reality.
               </p>
