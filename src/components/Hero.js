@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import '../styles/Hero.css'; // Corrected import path
 
 const Hero = () => {
@@ -34,35 +34,58 @@ const Hero = () => {
         '/images/out-0 (28).webp',
     ];
 
-    // Duplicate images to create an infinite scroll effect
-    const infiniteImages = Array(10).fill(images).flat();
+    // Create an 8x8 grid by repeating and slicing the images
+    const gridImages = Array(128).fill().map((_, i) => images[i % images.length]);
 
     const [highlightedIndex, setHighlightedIndex] = useState(null);
+    const carouselRef = useRef(null);
 
     useEffect(() => {
-        const items = document.querySelectorAll('.carousel-item');
-        items.forEach((item, index) => {
-            item.style.height = `${100 / 5}vh`; // Staggered heights to fit 5 rows in viewport height
-            item.addEventListener('mouseenter', () => setHighlightedIndex(index));
-            item.addEventListener('mouseleave', () => setHighlightedIndex(null));
-        });
+        const carousel = carouselRef.current;
+        let animationId;
+
+        const animate = () => {
+            carousel.scrollTop += 1;
+            if (carousel.scrollTop >= carousel.scrollHeight / 2) {
+                carousel.scrollTop = 0;
+            }
+            animationId = requestAnimationFrame(animate);
+        };
+
+        animationId = requestAnimationFrame(animate);
 
         return () => {
-            items.forEach((item) => {
-                item.removeEventListener('mouseenter', () => setHighlightedIndex(index));
-                item.removeEventListener('mouseleave', () => setHighlightedIndex(null));
-            });
+            cancelAnimationFrame(animationId);
         };
-    }, [infiniteImages.length]);
+    }, []);
 
     return (
         <div className="hero">
-            <div className="carousel">
-                {infiniteImages.map((image, index) => (
-                    <div key={index} className={`carousel-item ${index === highlightedIndex ? 'highlighted' : ''}`}>
-                        <img src={image} alt={`Slide ${index}`} />
-                    </div>
-                ))}
+            <div className="carousel" ref={carouselRef}>
+                <div className="carousel-content">
+                    {gridImages.map((image, index) => (
+                        <div
+                            key={index}
+                            className={`carousel-item ${index === highlightedIndex ? 'highlighted' : ''}`}
+                            onMouseEnter={() => setHighlightedIndex(index)}
+                            onMouseLeave={() => setHighlightedIndex(null)}
+                        >
+                            <img src={image} alt={`Slide ${index}`} />
+                        </div>
+                    ))}
+                </div>
+                <div className="carousel-content">
+                    {gridImages.map((image, index) => (
+                        <div
+                            key={index + gridImages.length}
+                            className={`carousel-item ${index + gridImages.length === highlightedIndex ? 'highlighted' : ''}`}
+                            onMouseEnter={() => setHighlightedIndex(index + gridImages.length)}
+                            onMouseLeave={() => setHighlightedIndex(null)}
+                        >
+                            <img src={image} alt={`Slide ${index}`} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
