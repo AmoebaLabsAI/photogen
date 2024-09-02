@@ -5,6 +5,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "via.placeholder.com",
+      },
+      {
+        protocol: "https",
         hostname: "replicate.com",
       },
       {
@@ -20,7 +24,7 @@ const nextConfig = {
         hostname: "localhost",
       },
     ],
-    domains: ['bflapistorage.blob.core.windows.net'],
+    domains: ["bflapistorage.blob.core.windows.net"],
   },
   // You can remove or comment out the webpack configuration below
   // webpack: (config) => {
