@@ -11,10 +11,7 @@ export default function LandingPage() {
       </p>
       <div className="flex justify-center gap-4">
         <Link href="/flux" className="button">
-          Try Flux Schnell
-        </Link>
-        <Link href="/pro" className="button">
-          Try Flux Pro
+          Try Our Image Generator!
         </Link>
       </div>
       <div className="mt-12">

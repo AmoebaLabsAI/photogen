@@ -14,7 +14,6 @@ export default function RootLayout({
             <Link href="/" className="text-xl font-bold">Flux AI</Link>
             <div className="space-x-4">
               <Link href="/flux">Flux Schnell</Link>
-              <Link href="/pro">Flux Pro</Link>
             </div>
           </div>
         </nav>
