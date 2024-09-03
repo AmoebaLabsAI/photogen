@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import '../styles/Hero.css'; // Corrected import path
+import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
+import '../styles/Hero.css';
 
 const Hero = () => {
     const images = [
@@ -32,35 +33,56 @@ const Hero = () => {
         '/images/out-0 (26).webp',
         '/images/out-0 (27).webp',
         '/images/out-0 (28).webp',
+        '/images/out-0 (29).webp',
+        '/images/out-0 (30).webp',
+        '/images/out-0 (31).webp',
     ];
 
-    // Duplicate images to create an infinite scroll effect
-    const infiniteImages = Array(10).fill(images).flat();
+    const numberOfColumns = 4;
 
-    const [highlightedIndex, setHighlightedIndex] = useState(null);
+    const columns = useMemo(() => {
+        const usedDurations = new Set();
+        return Array(numberOfColumns).fill().map(() => {
+            const columnImages = [];
+            for (let i = 0; i < 1000; i++) {
+                const randomIndex = Math.floor(Math.random() * images.length);
+                columnImages.push(images[randomIndex]);
+            }
 
-    useEffect(() => {
-        const items = document.querySelectorAll('.carousel-item');
-        items.forEach((item, index) => {
-            item.style.height = `${100 / 5}vh`; // Staggered heights to fit 5 rows in viewport height
-            item.addEventListener('mouseenter', () => setHighlightedIndex(index));
-            item.addEventListener('mouseleave', () => setHighlightedIndex(null));
+            let randomDuration;
+            do {
+                randomDuration = Math.floor(Math.random() * (7200 - 3600 + 1) + 3600);
+            } while (usedDurations.has(randomDuration));
+
+            usedDurations.add(randomDuration);
+            return { images: columnImages, duration: randomDuration };
         });
+    }, []);
 
-        return () => {
-            items.forEach((item) => {
-                item.removeEventListener('mouseenter', () => setHighlightedIndex(index));
-                item.removeEventListener('mouseleave', () => setHighlightedIndex(null));
-            });
-        };
-    }, [infiniteImages.length]);
+    const [highlightedCell, setHighlightedCell] = useState(null);
 
     return (
         <div className="hero">
             <div className="carousel">
-                {infiniteImages.map((image, index) => (
-                    <div key={index} className={`carousel-item ${index === highlightedIndex ? 'highlighted' : ''}`}>
-                        <img src={image} alt={`Slide ${index}`} />
+                {columns.map((column, colIndex) => (
+                    <div key={colIndex} className={`carousel-column ${colIndex % 2 === 0 ? 'down' : 'up'}`}>
+                        <div className="column-content" style={{ animationDuration: `${column.duration}s` }}>
+                            {column.images.map((image, rowIndex) => (
+                                <div
+                                    key={rowIndex}
+                                    className={`carousel-item ${highlightedCell === `${colIndex}-${rowIndex}` ? 'highlighted' : ''}`}
+                                    onMouseEnter={() => setHighlightedCell(`${colIndex}-${rowIndex}`)}
+                                    onMouseLeave={() => setHighlightedCell(null)}
+                                >
+                                    <Image
+                                        src={image}
+                                        alt={`Slide ${colIndex}-${rowIndex}`}
+                                        layout="fill"
+                                        objectFit="cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ))}
             </div>
