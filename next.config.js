@@ -2,44 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "via.placeholder.com",
-      },
-      {
-        protocol: "https",
-        hostname: "replicate.com",
-      },
-      {
-        protocol: "https",
-        hostname: "replicate.delivery",
-      },
-      {
-        protocol: "https",
-        hostname: "*.replicate.delivery",
-      },
-      {
-        protocol: "http",
-        hostname: "localhost",
-      },
-    ],
-    domains: ["bflapistorage.blob.core.windows.net"],
+    domains: ['localhost'],
+    unoptimized: true,
   },
-  // You can remove or comment out the webpack configuration below
-  // webpack: (config) => {
-  //   config.module.rules.push({
-  //     test: /\.(glb|gltf)$/,
-  //     use: {
-  //       loader: 'file-loader',
-  //       options: {
-  //         publicPath: '/_next/static/images',
-  //         outputPath: 'static/images/',
-  //       },
-  //     },
-  //   });
-  //   return config;
-  // },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

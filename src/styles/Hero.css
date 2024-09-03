@@ -35,7 +35,7 @@
 }
 
 .carousel-item {
-    flex: 0 0 12.5vh;
+    flex: 0 0 33.33vh;
     position: relative;
     overflow: hidden;
 }
@@ -48,8 +48,8 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    /* Increased opacity to dim the images more */
-    transition: opacity 0.3s ease;
+    transition: opacity 0s;
+    /* Changed from 0.3s to 0s for instant effect */
     z-index: 1;
 }
 
@@ -58,37 +58,34 @@
 }
 
 .carousel-item img {
-    width: 130%;
-    height: 130%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: transform 0.3s ease;
+    transition: transform 0s;
+    /* Changed from 0.3s to 0s for instant effect */
 }
 
 .carousel-item.highlighted img {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: scale(1.1);
 }
 
 @keyframes scrollDown {
     0% {
-        transform: translateY(0);
+        transform: translateY(-66.67%);
     }
 
     100% {
-        transform: translateY(-75%);
+        transform: translateY(0);
     }
 }
 
 @keyframes scrollUp {
     0% {
-        transform: translateY(-75%);
+        transform: translateY(0);
     }
 
     100% {
-        transform: translateY(0);
+        transform: translateY(-66.67%);
     }
 }
 

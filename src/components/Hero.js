@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import '../styles/Hero.css';
 
 const Hero = () => {
@@ -32,22 +33,24 @@ const Hero = () => {
         '/images/out-0 (26).webp',
         '/images/out-0 (27).webp',
         '/images/out-0 (28).webp',
+        '/images/out-0 (29).webp',
+        '/images/out-0 (30).webp',
+        '/images/out-0 (31).webp',
     ];
 
-    const imagesPerColumn = 1000; // Increased to 1000 images per column
+    const numberOfColumns = 4;
 
     const columns = useMemo(() => {
         const usedDurations = new Set();
-
-        return Array(8).fill().map((_, colIndex) => {
+        return Array(numberOfColumns).fill().map(() => {
             const columnImages = [];
-            for (let i = 0; i < imagesPerColumn; i++) {
-                columnImages.push(images[(colIndex + i) % images.length]);
+            for (let i = 0; i < 1000; i++) {
+                const randomIndex = Math.floor(Math.random() * images.length);
+                columnImages.push(images[randomIndex]);
             }
 
             let randomDuration;
             do {
-                // Adjusted duration range: 3600 to 7200 seconds (1 to 2 hours)
                 randomDuration = Math.floor(Math.random() * (7200 - 3600 + 1) + 3600);
             } while (usedDurations.has(randomDuration));
 
@@ -71,7 +74,12 @@ const Hero = () => {
                                     onMouseEnter={() => setHighlightedCell(`${colIndex}-${rowIndex}`)}
                                     onMouseLeave={() => setHighlightedCell(null)}
                                 >
-                                    <img src={image} alt={`Slide ${colIndex}-${rowIndex}`} />
+                                    <Image
+                                        src={image}
+                                        alt={`Slide ${colIndex}-${rowIndex}`}
+                                        layout="fill"
+                                        objectFit="cover"
+                                    />
                                 </div>
                             ))}
                         </div>
