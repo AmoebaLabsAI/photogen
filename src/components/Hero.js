@@ -51,7 +51,9 @@ const Hero = () => {
 
             let randomDuration;
             do {
-                randomDuration = Math.floor(Math.random() * (7200 - 3600 + 1) + 3600);
+                // Increase the duration range by 75% to slow down the carousel
+                // Now it's between 78.75 to 118.125 minutes (4,725,000 to 7,087,500 milliseconds)
+                randomDuration = Math.floor(Math.random() * (7087500 - 4725000 + 1) + 4725000);
             } while (usedDurations.has(randomDuration));
 
             usedDurations.add(randomDuration);
@@ -66,7 +68,7 @@ const Hero = () => {
             <div className="carousel">
                 {columns.map((column, colIndex) => (
                     <div key={colIndex} className={`carousel-column ${colIndex % 2 === 0 ? 'down' : 'up'}`}>
-                        <div className="column-content" style={{ animationDuration: `${column.duration}s` }}>
+                        <div className="column-content" style={{ animationDuration: `${column.duration}ms` }}>
                             {column.images.map((image, rowIndex) => (
                                 <div
                                     key={rowIndex}
