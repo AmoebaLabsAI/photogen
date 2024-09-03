@@ -1,5 +1,5 @@
 import "../styles/globals.css";
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function RootLayout({
   // Layouts must accept a children prop.
@@ -11,11 +11,13 @@ export default function RootLayout({
       <body>
         <nav className="bg-gray-800 text-white p-4">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="text-xl font-bold">PhotoGen | An Amoeba Labs Experiment</Link>
+            <Link href="/" className="text-xl font-bold">
+              PhotoGen | An Amoeba Labs Experiment
+            </Link>
           </div>
         </nav>
         {children}
       </body>
     </html>
-  )
+  );
 }
