@@ -47,7 +47,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.3);
+    /* Reduced opacity to make background images more visible */
     transition: opacity 0.3s ease;
     z-index: 1;
 }
@@ -90,3 +91,43 @@
         transform: translateY(0);
     }
 }
+
+/* Remove or comment out the following styles */
+/*
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 10;
+    max-width: 80%;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 10px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.hero-content ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+}
+
+.hero-content li {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+*/
+
+/* Keep all other styles as they are */
