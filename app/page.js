@@ -12,84 +12,6 @@ const Background3D = dynamic(() => import("../src/components/Background3D"), {
 const Hero = dynamic(() => import("../src/components/Hero"), { ssr: false });
 
 export default function LandingPage() {
-  const topics = [
-    {
-      name: "Portrait Studio",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Virtual Fashion",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Social Media Influencer",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Retro Aesthetics",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Professional Headshots",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Artistic Expressions",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Travel Memories",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Futuristic Concepts",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Fitness and Wellness",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Nature and Wildlife",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Urban Exploration",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Culinary Delights",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Seasonal Celebrations",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Vintage Nostalgia",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-    {
-      name: "Tech Innovations",
-      img1: "https://via.placeholder.com/300",
-      img2: "https://via.placeholder.com/300",
-    },
-  ];
-
   return (
     <div className="flex flex-col min-h-screen bg-black relative">
       <Canvas className="absolute inset-0 z-0 mt-[-150px]">
@@ -101,43 +23,38 @@ export default function LandingPage() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="container mx-auto px-5 flex flex-col md:flex-row items-center">
             <div className="w-full md:w-[70%] pr-0 md:pr-8 flex flex-col justify-center items-center text-center pointer-events-auto">
-              <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white shadow-text">
-                Welcome to Flux AI
-              </h1>
-              <p className="text-lg md:text-xl mb-6 text-gray-200 shadow-text">
-                PhotoGen is your gateway to creating stunning photos using
-                artificial intelligence. Choose from our various models to turn
-                your ideas into visual reality.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link
-                  href="/flux_schnell"
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Try Flux Schnell
-                </Link>
-                <Link
-                  href="/flux_pro"
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Try Flux Pro
-                </Link>
-                <Link
-                  href="/lightning"
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Try Lightning
-                </Link>
-                <Link
-                  href="/africa"
-                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Try Africa
-                </Link>
+              <div className="bg-white bg-opacity-40 p-6 rounded-lg shadow-md">
+                <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white shadow-text">
+                  Throw away your Camera – Let AI Capture Your World!
+                </h1>
+                <p className="text-lg md:text-xl mb-6 text-gray-200 shadow-text">
+                  Revolutionize your memories with Photogen, powered by state-of-the-art models and crafted by two AI enthusiasts.
+                  Say goodbye to tedious photo shoots and hello to breathtaking images and videos, all generated by AI right from your device.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link
+                    href="/create-photo"
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Create AI Photo
+                  </Link>
+                  <Link
+                    href="/style-model"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Style Virtual Model
+                  </Link>
+                  <Link
+                    href="/create-video"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Create AI Video
+                  </Link>
+                </div>
               </div>
             </div>
             <div className="w-full md:w-[30%] flex items-center justify-center pointer-events-auto mt-8 md:mt-0">
-              <form className="space-y-4 w-full max-w-sm bg-white bg-opacity-20 p-6 rounded-lg shadow-md">
+              <form className="space-y-4 w-full max-w-sm bg-white bg-opacity-40 p-6 rounded-lg shadow-md">
                 <input
                   type="text"
                   placeholder="Username"
@@ -162,47 +79,16 @@ export default function LandingPage() {
       <div className="relative z-10 bg-white text-black py-20">
         <div className="container mx-auto px-5">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">
-            Why Choose Flux AI?
+            Why Choose Photogen?
           </h2>
           <p className="text-lg md:text-xl mb-6">
-            Flux AI offers state-of-the-art AI models to help you create
-            stunning photos effortlessly. Our models are trained on diverse
-            datasets to ensure high-quality results for any type of image you
-            want to create.
+            Photogen offers cutting-edge AI models to help you create stunning photos and videos effortlessly.
+            Our models are trained on diverse datasets to ensure high-quality results for any type of image or video you want to create.
           </p>
           <p className="text-lg md:text-xl mb-6">
-            Whether you're a professional photographer or just someone who loves
-            taking pictures, Flux AI has the tools you need to bring your vision
-            to life.
+            Whether you're a professional content creator or just someone who loves capturing memories,
+            Photogen has the tools you need to bring your vision to life.
           </p>
-        </div>
-      </div>
-      <div className="relative z-10 bg-black text-white py-20">
-        <div className="container mx-auto px-5 grid grid-cols-3 gap-8">
-          {topics.map((topic, index) => (
-            <div
-              key={index}
-              className="bg-white text-black p-6 rounded-lg shadow-md"
-            >
-              <h3 className="text-2xl font-bold mb-4">{topic.name}</h3>
-              <div className="flex justify-between space-x-4">
-                <Image
-                  src={topic.img1}
-                  alt={`${topic.name} 1`}
-                  width={150}
-                  height={150}
-                  className="w-1/2 h-auto rounded-lg"
-                />
-                <Image
-                  src={topic.img2}
-                  alt={`${topic.name} 2`}
-                  width={150}
-                  height={150}
-                  className="w-1/2 h-auto rounded-lg"
-                />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
       {/* Static Footer */}

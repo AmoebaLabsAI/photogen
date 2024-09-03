@@ -1,70 +1,130 @@
 .hero {
-    position: relative;
-    width: 100%;
+    width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    /* Dark and translucent */
     overflow: hidden;
-    z-index: 0;
-    /* Ensure hero is in the background */
+    position: relative;
 }
 
 .carousel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.carousel-column {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.column-content {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    /* 5 columns */
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    /* 5 rows */
-    gap: 0;
-    /* Remove gaps between grid items */
-    padding: 0;
-    /* Remove padding around the grid */
-    overflow: hidden;
-    background-color: black;
-    /* Set carousel background to black */
+    right: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.carousel-column.down .column-content {
+    animation: scrollDown linear infinite;
+}
+
+.carousel-column.up .column-content {
+    animation: scrollUp linear infinite;
 }
 
 .carousel-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    flex: 0 0 33.33vh;
+    position: relative;
     overflow: hidden;
-    animation: slideInOut 30s linear infinite;
-    /* Animation for sliding in and out */
 }
 
-.carousel img {
+.carousel-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    transition: opacity 0s;
+    /* Changed from 0.3s to 0s for instant effect */
+    z-index: 1;
+}
+
+.carousel-item.highlighted::after {
+    opacity: 0;
+}
+
+.carousel-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Maintain aspect ratio and cover the container */
-    filter: brightness(30%);
-    /* Dim the images more */
-    transition: filter 0.3s ease;
-    /* Smooth transition */
+    transition: transform 0s;
+    /* Changed from 0.3s to 0s for instant effect */
 }
 
 .carousel-item.highlighted img {
-    filter: brightness(100%);
-    /* Brighten the highlighted image */
+    transform: scale(1.1);
 }
 
-@keyframes slideInOut {
+@keyframes scrollDown {
     0% {
-        transform: translateX(-100%);
-    }
-
-    50% {
-        transform: translateX(0);
+        transform: translateY(-66.67%);
     }
 
     100% {
-        transform: translateX(100%);
+        transform: translateY(0);
     }
 }
+
+@keyframes scrollUp {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-66.67%);
+    }
+}
+
+/* Remove or comment out the following styles */
+/*
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 10;
+    max-width: 80%;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 10px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.hero-content ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+}
+
+.hero-content li {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+*/
+
+/* Keep all other styles as they are */
