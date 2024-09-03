@@ -14,6 +14,7 @@ export default function FofrForm() {
     const [error, setError] = useState<string | null>(null)
     const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([])
     const [predictionId, setPredictionId] = useState<string | null>(null)
+    const [progress, setProgress] = useState(0)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -22,6 +23,7 @@ export default function FofrForm() {
         setLoading(true)
         setError(null)
         setGeneratedImageUrls([])
+        setProgress(0)
 
         const formData = new FormData()
         formData.append('image', image)
@@ -37,6 +39,7 @@ export default function FofrForm() {
 
             if (response.ok && data.id) {
                 setPredictionId(data.id)
+                setProgress(10) // Start progress at 10%
             } else {
                 setError(data.error || 'Failed to generate image')
                 console.error('API response:', data)
@@ -60,11 +63,14 @@ export default function FofrForm() {
                 if (data.status === 'succeeded' && data.output) {
                     setGeneratedImageUrls(data.output)
                     setPredictionId(null)
+                    setProgress(100) // Complete progress
                 } else if (data.status === 'failed') {
                     setError('Image generation failed')
                     setPredictionId(null)
+                    setProgress(0) // Reset progress
                 } else {
-                    // Still processing, check again in 2 seconds
+                    // Still processing, update progress
+                    setProgress((prevProgress) => Math.min(prevProgress + 10, 90))
                     setTimeout(() => checkPrediction(0), 2000)
                 }
             } catch (error) {
@@ -75,6 +81,7 @@ export default function FofrForm() {
                 } else {
                     setError('Failed to check image generation status')
                     setPredictionId(null)
+                    setProgress(0) // Reset progress
                 }
             }
         }
@@ -113,7 +120,18 @@ export default function FofrForm() {
             {error && (
                 <div className="text-red-600 font-medium">{error}</div>
             )}
-            {loading && <div>Generating images, please wait...</div>}
+            {loading && (
+                <div>
+                    <div>Generating images, please wait...</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
+                        <div
+                            className="bg-blue-600 h-2.5 rounded-full"
+                            style={{ width: `${progress}%` }}
+                        ></div>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-1">{progress}% complete</div>
+                </div>
+            )}
             {generatedImageUrls.length > 0 && (
                 <div>
                     <h2 className="text-xl font-bold mt-6 mb-2">Generated Images</h2>
