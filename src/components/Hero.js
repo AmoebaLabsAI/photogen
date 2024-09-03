@@ -47,8 +47,8 @@ const Hero = () => {
 
             let randomDuration;
             do {
-                // Adjusted duration range: 900 to 1800 seconds (15 to 30 minutes)
-                randomDuration = Math.floor(Math.random() * (1800 - 900 + 1) + 900);
+                // Adjusted duration range: 3600 to 7200 seconds (1 to 2 hours)
+                randomDuration = Math.floor(Math.random() * (7200 - 3600 + 1) + 3600);
             } while (usedDurations.has(randomDuration));
 
             usedDurations.add(randomDuration);
