@@ -1,81 +1,112 @@
 "use client";
 
-import React, { useState } from 'react';
-import { generateAfricaImage } from '../../actions/replicate-actions';
-import Image from 'next/image';
+import React, { useState } from "react";
+import { generateAfricaImage } from "../../actions/replicate-actions";
+import Image from "next/image";
+import { Loader2, ImageIcon, Sparkles } from "lucide-react";
 
 const AfricaPage: React.FC = () => {
-    const [prompt, setPrompt] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        try {
-            const result = await generateAfricaImage(prompt);
-            setImageUrl(result[0]); // Use the first element of the result as the image URL
-        } catch (error) {
-            console.error('Error generating image:', error);
-        }
-        setIsLoading(false);
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim() || isLoading) return;
+    setIsLoading(true);
+    try {
+      const result = await generateAfricaImage(prompt);
+      setImageUrls(Array.isArray(result) ? result : [result]);
+    } catch (error) {
+      console.error("Error generating image:", error);
+    }
+    setIsLoading(false);
+  };
 
-    const handleDownload = () => {
-        if (imageUrl) {
-            const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = 'africa-image.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
 
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8">Africa Image Generator</h1>
-            <form onSubmit={handleSubmit} className="mb-8">
-                <input
-                    type="text"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Enter your image prompt"
-                    className="w-full p-2 border rounded mb-4"
-                    required
-                />
-                <button
-                    type="submit"
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Generating...' : 'Generate Image'}
-                </button>
-            </form>
+  const handleDownload = (url: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "africa-image.webp";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-            <div className="image-container">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded">
-                        <p>Generating image...</p>
-                    </div>
-                ) : imageUrl ? (
-                    <div>
-                        <Image src={imageUrl} alt="Generated image" width={512} height={512} className="rounded" />
-                        <button
-                            onClick={handleDownload}
-                            className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-                        >
-                            Download Image
-                        </button>
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded">
-                        <p>Your generated image will appear here</p>
-                    </div>
-                )}
+  return (
+    <div className="flex flex-col md:flex-row h-[100vh] overflow-hidden">
+      {/* Sidebar (top on mobile) */}
+      <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-green-400 via-yellow-500 to-red-500">
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="mb-4">
+            <textarea
+              placeholder="Describe your vision"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full h-32 md:h-full p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading || !prompt.trim()}
+            className="w-full bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? <>Conjuring Image...</> : "Generate African Magic"}
+          </button>
+        </form>
+      </div>
+
+      {/* Main content (bottom on mobile) */}
+      <div className="w-full md:w-3/4 p-4 md:p-6 overflow-y-auto flex-grow bg-gradient-to-br from-green-400 via-yellow-500 to-red-500 flex items-center justify-center">
+        <div className="w-full max-w-lg">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64 bg-white bg-opacity-20 rounded-xl">
+              <Loader2 className="w-8 h-8 animate-spin text-white" />
+              <p className="ml-2 text-lg text-white">Generating image...</p>
             </div>
+          ) : imageUrls.length > 0 ? (
+            <div>
+              {imageUrls.map((url, index) => (
+                <div key={index} className="mb-8 flex flex-col items-center">
+                  <div className="w-full aspect-square relative">
+                    <Image
+                      src={url}
+                      alt={`Generated image ${index + 1}`}
+                      layout="fill"
+                      objectFit="contain"
+                      className="rounded-xl shadow-lg drop-shadow-md"
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => handleDownload(url)}
+                      className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
+                    >
+                      <ImageIcon className="mr-2" /> Download Image
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-64 bg-white bg-opacity-20 rounded-xl">
+              <Sparkles className="w-8 h-8 text-white mr-2" />
+              <p className="text-lg text-white">
+                Your generated image will appear here
+              </p>
+            </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default AfricaPage;

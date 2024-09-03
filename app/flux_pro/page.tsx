@@ -1,83 +1,115 @@
 "use client";
 
-import React, { useState } from 'react';
-import { generateFluxProImage } from '../../actions/replicate-actions';
-import Image from 'next/image';
+import React, { useState } from "react";
+import { generateFluxProImage } from "../../actions/replicate-actions";
+import Image from "next/image";
+import { Loader2, ImageIcon, Sparkles } from "lucide-react";
 
 const FluxProPage: React.FC = () => {
-    const [prompt, setPrompt] = useState('');
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        try {
-            const result = await generateFluxProImage(prompt);
-            setImageUrls(Array.isArray(result) ? result : [result]); // Ensure result is an array
-        } catch (error) {
-            console.error('Error generating image:', error);
-        }
-        setIsLoading(false);
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim() || isLoading) return;
+    setIsLoading(true);
+    try {
+      const result = await generateFluxProImage(prompt);
+      setImageUrls(Array.isArray(result) ? result : [result]);
+    } catch (error) {
+      console.error("Error generating image:", error);
+    }
+    setIsLoading(false);
+  };
 
-    const handleDownload = (url: string) => {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'flux-pro-image.webp';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
 
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold mb-8">Flux Pro Image Generator</h1>
-            <form onSubmit={handleSubmit} className="mb-8">
-                <input
-                    type="text"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Enter your image prompt"
-                    className="w-full p-2 border rounded mb-4"
-                    required
-                />
-                <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Generating...' : 'Generate Image'}
-                </button>
-            </form>
+  const handleDownload = (url: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "flux-pro-image.webp";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-            <div className="image-container">
-                {isLoading ? (
-                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded">
-                        <p>Generating image...</p>
-                    </div>
-                ) : imageUrls.length > 0 ? (
-                    <div>
-                        {imageUrls.map((url, index) => (
-                            <div key={index} className="mb-4">
-                                <Image src={url} alt={`Generated image ${index + 1}`} width={512} height={512} className="rounded" />
-                                <button
-                                    onClick={() => handleDownload(url)}
-                                    className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-                                >
-                                    Download Image
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-center h-64 bg-gray-100 rounded">
-                        <p>Your generated image will appear here</p>
-                    </div>
-                )}
+  return (
+    <div className="flex flex-col md:flex-row h-screen">
+      {/* Sidebar (top on mobile) */}
+      <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          <div className="flex-grow mb-4">
+            <textarea
+              placeholder="Describe your vision"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full h-full min-h-[100px] p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading || !prompt.trim()}
+            className="w-full bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? <>Conjuring Image...</> : "Generate Magic"}
+          </button>
+        </form>
+      </div>
+
+      {/* Main content (bottom on mobile) */}
+      <div className="w-full md:w-3/4 p-4 md:p-6 flex-grow bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
+        <div className="w-full max-w-lg max-h-full flex items-center justify-center">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
+              <Loader2 className="w-8 h-8 animate-spin text-white" />
+              <p className="ml-2 text-lg text-white">Generating image...</p>
             </div>
+          ) : imageUrls.length > 0 ? (
+            <div className="w-full h-full flex flex-col items-center justify-center">
+              {imageUrls.map((url, index) => (
+                <div
+                  key={index}
+                  className="w-full h-full flex flex-col items-center justify-center"
+                >
+                  <div className="w-full h-full relative">
+                    <Image
+                      src={url}
+                      alt={`Generated image ${index + 1}`}
+                      layout="fill"
+                      objectFit="contain"
+                      className="rounded-xl shadow-lg drop-shadow-md"
+                    />
+                  </div>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => handleDownload(url)}
+                      className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
+                    >
+                      <ImageIcon className="mr-2" /> Download Image
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
+              <Sparkles className="w-8 h-8 text-white mr-2" />
+              <p className="text-lg text-white">
+                Your generated image will appear here
+              </p>
+            </div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default FluxProPage;

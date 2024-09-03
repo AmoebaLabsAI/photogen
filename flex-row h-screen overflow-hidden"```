@@ -1,0 +1,59 @@
+<div className="flex flex-col md:flex-row h-screen overflow-hidden">
+  {/* Sidebar (top on mobile) */}
+  <div className="w-full md:w-1/4 bg-gray-100 p-4 md:p-6 flex flex-col overflow-auto">
+    <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      <div className="flex-grow mb-4">
+        <textarea
+          placeholder="Describe your vision"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          className="w-full h-[37.5px] min-h-[37.5px] p-2 border-2 border-purple-400 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none"
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={isLoading || !prompt}
+        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105"
+      >
+        {isLoading ? <>Conjuring Image...</> : "Generate Magic"}
+      </button>
+    </form>
+  </div>
+
+  {/* Main content (bottom on mobile) */}
+  <div className="w-full md:w-3/4 p-4 md:p-6 overflow-auto">
+    <div className="max-w-3xl mx-auto">
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64 bg-gray-200 rounded-xl">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+          <p className="ml-2 text-lg">Generating image...</p>
+        </div>
+      ) : imageUrls.length > 0 ? (
+        <div>
+          {imageUrls.map((url, index) => (
+            <div key={index} className="mb-8">
+              <Image
+                src={url}
+                alt={`Generated image ${index + 1}`}
+                width={512}
+                height={512}
+                className="rounded-xl shadow-lg w-full h-auto"
+              />
+              <button
+                onClick={() => handleDownload(url)}
+                className="mt-4 bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center"
+              >
+                <ImageIcon className="mr-2" /> Download Image
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-64 bg-gray-200 rounded-xl">
+          <Sparkles className="w-8 h-8 text-purple-600 mr-2" />
+          <p className="text-lg">Your generated image will appear here</p>
+        </div>
+      )}
+    </div>
+  </div>
+</div>;
