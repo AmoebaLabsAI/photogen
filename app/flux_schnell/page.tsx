@@ -40,17 +40,17 @@ const FluxSchnellPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-[100vh] overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen">
       {/* Sidebar (top on mobile) */}
       <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
-        <form onSubmit={handleSubmit} className="flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full">
           <div className="mb-4">
             <textarea
               placeholder="Describe your vision"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full h-32 md:h-full p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
+              className="w-full h-32 md:h-40 p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
             />
           </div>
           <button
@@ -64,8 +64,8 @@ const FluxSchnellPage: React.FC = () => {
       </div>
 
       {/* Main content (bottom on mobile) */}
-      <div className="w-full md:w-3/4 p-4 md:p-6 overflow-y-auto flex-grow bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center">
-        <div className="w-full max-w-lg">
+      <div className="w-full md:w-3/4 p-4 md:p-6 flex-grow bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
+        <div className="w-full max-w-lg max-h-full flex items-center justify-center">
           {isLoading ? (
             <div className="flex items-center justify-center h-64 bg-white bg-opacity-20 rounded-xl">
               <Loader2 className="w-8 h-8 animate-spin text-white" />

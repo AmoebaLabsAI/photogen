@@ -44,13 +44,13 @@ const FluxProPage: React.FC = () => {
       {/* Sidebar (top on mobile) */}
       <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-grow mb-4">
+          <div className="mb-4">
             <textarea
               placeholder="Describe your vision"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full h-full min-h-[100px] p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
+              className="w-full h-32 md:h-40 p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
             />
           </div>
           <button
