@@ -1,14 +1,22 @@
+.hero-container {
+    position: relative;
+    width: 100%;
+}
+
 .hero {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     position: relative;
+    color: white;
 }
 
 .carousel {
     width: 100%;
     height: 100%;
     display: flex;
+    z-index: 10;
+    /* Add this to ensure carousel is behind hero-content */
 }
 
 .carousel-column {
@@ -128,3 +136,42 @@
 */
 
 /* Keep all other styles as they are */
+
+/* Ensure all text within the hero and testimonials sections is white */
+.testimonials {
+    color: white;
+}
+
+/* Backgrounds are already set to black in the JSX, but ensure any specific elements are also styled if needed */
+.testimonials .bg-white {
+    background-color: rgba(255, 255, 255, 0.1);
+    /* Light opacity for slight visibility */
+}
+
+.hero-content {
+    position: absolute;
+    bottom: 350px;
+    /* Adjust this value to leave space
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    z-index: 20;
+    /* Increase this value */
+    width: 80%;
+    max-width: 500px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Remove these styles */
+.hero-image,
+.hero-image-container,
+.vision-image {
+    /* Remove all styles for these classes */
+}
+
+/* Keep all other existing styles */

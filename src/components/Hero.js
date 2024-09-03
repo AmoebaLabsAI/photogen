@@ -64,30 +64,33 @@ const Hero = () => {
     const [highlightedCell, setHighlightedCell] = useState(null);
 
     return (
-        <div className="hero">
-            <div className="carousel">
-                {columns.map((column, colIndex) => (
-                    <div key={colIndex} className={`carousel-column ${colIndex % 2 === 0 ? 'down' : 'up'}`}>
-                        <div className="column-content" style={{ animationDuration: `${column.duration}ms` }}>
-                            {column.images.map((image, rowIndex) => (
-                                <div
-                                    key={rowIndex}
-                                    className={`carousel-item ${highlightedCell === `${colIndex}-${rowIndex}` ? 'highlighted' : ''}`}
-                                    onMouseEnter={() => setHighlightedCell(`${colIndex}-${rowIndex}`)}
-                                    onMouseLeave={() => setHighlightedCell(null)}
-                                >
-                                    <Image
-                                        src={image}
-                                        alt={`Slide ${colIndex}-${rowIndex}`}
-                                        layout="fill"
-                                        objectFit="cover"
-                                    />
-                                </div>
-                            ))}
+        <div className="hero-container">
+            <div className="hero">
+                <div className="carousel">
+                    {columns.map((column, colIndex) => (
+                        <div key={colIndex} className={`carousel-column ${colIndex % 2 === 0 ? 'down' : 'up'}`}>
+                            <div className="column-content" style={{ animationDuration: `${column.duration}ms` }}>
+                                {column.images.map((image, rowIndex) => (
+                                    <div
+                                        key={rowIndex}
+                                        className={`carousel-item ${highlightedCell === `${colIndex}-${rowIndex}` ? 'highlighted' : ''}`}
+                                        onMouseEnter={() => setHighlightedCell(`${colIndex}-${rowIndex}`)}
+                                        onMouseLeave={() => setHighlightedCell(null)}
+                                    >
+                                        <Image
+                                            src={image}
+                                            alt={`Slide ${colIndex}-${rowIndex}`}
+                                            layout="fill"
+                                            objectFit="cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
+            {/* Remove the vision-image div from here */}
         </div>
     );
 };
