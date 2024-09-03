@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import BackgroundImageGrid from "../src/components/BackgroundImageGrid";
 
 const Background3D = dynamic(() => import("../src/components/Background3D"), {
   ssr: false,
@@ -33,7 +34,7 @@ export default function LandingPage() {
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                   <Link
-                    href="/create-photo"
+                    href="/flux_pro"
                     className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
                   >
                     Create AI Photo
@@ -76,7 +77,39 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-      <div className="relative z-10 bg-white text-black py-20">
+
+      {/* Testimonials Section with Background Image Grid */}
+      <div className="relative">
+        <div className="absolute inset-0 z-0 w-full h-full">
+          <BackgroundImageGrid />
+        </div>
+
+        {/* Testimonials Section */}
+        <div className="relative z-10 bg-black bg-opacity-50 py-20">
+          <div className="container mx-auto px-5 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <p className="text-lg mb-4 text-black">"Photogen has revolutionized my Instagram game! I can create stunning, professional-looking photos in minutes. It's like having a personal photographer in my pocket!"</p>
+                <p className="font-bold text-black">- Sarah J., Influencer</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <p className="text-lg mb-4 text-black">"As a small business owner, Photogen has been a game-changer for my product photography. I've saved so much time and money, and my sales have increased thanks to the high-quality images."</p>
+                <p className="font-bold text-black">- Mike T., E-commerce Entrepreneur</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <p className="text-lg mb-4 text-black">"I'm not a professional photographer, but Photogen makes me feel like one. It's incredibly easy to use, and the results are always impressive. My family photos have never looked better!"</p>
+                <p className="font-bold text-black">- Emily R., Hobbyist Photographer</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Empty space to extend the background image grid */}
+        <div className="h-40"></div>
+      </div>
+
+      {/* Why Choose Photogen Section */}
+      <div className="relative z-10 bg-black text-white py-20">
         <div className="container mx-auto px-5">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">
             Why Choose Photogen?
@@ -91,6 +124,7 @@ export default function LandingPage() {
           </p>
         </div>
       </div>
+
       {/* Static Footer */}
       <footer className="bg-gray-900 text-white py-6 relative z-10">
         <div className="container mx-auto px-5 flex flex-col md:flex-row justify-between items-center">
