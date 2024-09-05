@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes scrollDown {
+  0% { transform: translateY(-20%); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes scrollUp {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20%); }
+}
+
+.animate-scroll-down {
+  animation: scrollDown 60s linear infinite;
+}
+
+.animate-scroll-up {
+  animation: scrollUp 60s linear infinite;
+}
+
+@keyframes flip {
+  0% { transform: perspective(400px) rotateY(0); }
+  100% { transform: perspective(400px) rotateY(180deg); }
+}
+
+.flip {
+  animation: flip 5s;
+  transform-style: preserve-3d;
+}
 
 input {
   @apply border;
