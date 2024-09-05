@@ -10,6 +10,7 @@
     "test": "npm run lint && npm run build"
   },
   "dependencies": {
+    "@clerk/nextjs": "^4.17.3",
     "@react-three/drei": "^9.111.5",
     "@react-three/fiber": "^8.17.6",
     "eslint": "8.54.0",
