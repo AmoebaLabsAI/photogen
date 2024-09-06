@@ -4,9 +4,15 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+// Define the type for a saved image
+interface SavedImage {
+  id: string;
+  image_url: string;
+}
+
 const SavedImagesPage = () => {
   const { user } = useUser();
-  const [savedImages, setSavedImages] = useState([]);
+  const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
