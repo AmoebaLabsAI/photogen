@@ -27,6 +27,8 @@ export async function generateFluxProImage(prompt: string) {
   };
 
   const output = await replicate.run("black-forest-labs/flux-pro", { input });
+  console.log("output" + output);
+
   return output;
 }
 
