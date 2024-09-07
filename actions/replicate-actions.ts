@@ -19,8 +19,7 @@ export async function generateFluxImage(prompt: string) {
 
 export async function generateFluxProImage(prompt: string) {
   const input = {
-    prompt:
-      "The world's largest black forest cake, the size of a building, surrounded by trees of the black forest",
+    prompt: prompt,
   };
 
   const output = await replicate.run("black-forest-labs/flux-pro", { input });
