@@ -18,22 +18,21 @@ const FluxProPage: React.FC = () => {
     if (!prompt.trim() || isLoading) return;
     setIsLoading(true);
     try {
+      console.log("Calling generateFluxProImage with prompt:", prompt);
       const result = await generateFluxProImage(prompt);
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
-      console.log("***********************");
+      console.log("Result from generateFluxProImage:", result);
 
-      console.log("result" + result);
+      if (!result) {
+        throw new Error("No result returned from generateFluxProImage");
+      }
+
       setImageUrls(Array.isArray(result) ? result : [result]);
     } catch (error) {
       console.error("Error generating image:", error);
+      alert(`Failed to generate image: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
