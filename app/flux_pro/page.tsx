@@ -22,7 +22,7 @@ const FluxProPage: React.FC = () => {
       const result = await generateFluxProImage(prompt);
       console.log("Result from generateFluxProImage:", result);
 
-      if (!result) {
+      if (result === undefined || result === null) {
         throw new Error("No result returned from generateFluxProImage");
       }
 
