@@ -7,6 +7,8 @@ import { Loader2, ImageIcon, Sparkles, Save } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 
+export const maxDuration = 300; // Applies to the actions
+
 const FluxProPage: React.FC = () => {
   const [prompt, setPrompt] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
