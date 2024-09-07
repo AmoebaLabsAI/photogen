@@ -19,6 +19,16 @@ const FluxProPage: React.FC = () => {
     setIsLoading(true);
     try {
       const result = await generateFluxProImage(prompt);
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+      console.log("***********************");
+
+      console.log("result" + result);
       setImageUrls(Array.isArray(result) ? result : [result]);
     } catch (error) {
       console.error("Error generating image:", error);
