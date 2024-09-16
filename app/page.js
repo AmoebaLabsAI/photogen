@@ -4,10 +4,28 @@ import Link from "next/link";
 import Image from "next/image";
 import BackgroundImageGrid from "../src/components/BackgroundImageGrid";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+
+const SubscriptionPlan = ({ title, price, features, link }) => (
+  <div className="bg-white p-3 rounded-lg shadow-md">
+    <h3 className="text-lg font-bold mb-1">{title}</h3>
+    <p className="text-xl font-bold mb-2">${price}<span className="text-xs font-normal">/mo</span></p>
+    <Link href={link} className="block w-full bg-purple-600 text-white text-center py-1 rounded-md text-sm mb-2">Subscribe →</Link>
+    <ul className="text-xs space-y-1">
+      {features.map((feature, index) => (
+        <li key={index} className="flex items-start">
+          <span className="text-green-500 mr-1">✓</span>
+          {feature}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 export default function LandingPage() {
   const numberOfImages = 40;
   const [mounted, setMounted] = useState(false);
+  const { user } = useUser();
 
   useEffect(() => {
     setMounted(true);
@@ -15,139 +33,188 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen relative">
-      {/* Hero Section with Image Grid Background */}
-      <div className="relative z-10 min-h-screen flex flex-col overflow-hidden">
-        {/* Image Grid Background */}
-        <div className="absolute inset-0 z-0 grid grid-cols-4 md:grid-cols-8 gap-0">
-          {[...Array(8)].map((_, colIndex) => (
-            <div
-              key={colIndex}
-              className={`relative w-full h-full ${
-                colIndex % 2 === 0 ? "animate-scroll-down" : "animate-scroll-up"
-              }`}
-            >
-              {[...Array(5)].map((_, rowIndex) => (
-                <div key={rowIndex} className="relative w-full aspect-square">
-                  <Image
-                    src={`/images/${colIndex * 5 + rowIndex + 1}.webp`}
-                    alt={`Background ${colIndex * 5 + rowIndex + 1}`}
-                    layout="fill"
-                    objectFit="cover"
-                  />
-                </div>
-              ))}
-            </div>
-          ))}
+      {/* Header with Subscribe button and user picture */}
+      <header className="bg-gray-900 text-white py-4 px-5 fixed top-0 left-0 right-0 z-50">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold">Photogen</Link>
+          <div className="flex items-center space-x-4">
+            <Link href="/subscribe" className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+              Subscribe!
+            </Link>
+            {user && (
+              <Image
+                src={user.profileImageUrl}
+                alt="User profile"
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            )}
+          </div>
         </div>
+      </header>
 
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+      {/* Main content */}
+      <main className="flex-grow">
+        {/* Hero Section with Image Grid Background */}
+        <div className="relative z-10 min-h-screen flex flex-col overflow-hidden pt-16">
+          {/* Image Grid Background */}
+          <div className="absolute inset-0 z-0 grid grid-cols-4 md:grid-cols-8 gap-0">
+            {[...Array(8)].map((_, colIndex) => (
+              <div
+                key={colIndex}
+                className={`relative w-full h-full ${
+                  colIndex % 2 === 0 ? "animate-scroll-down" : "animate-scroll-up"
+                }`}
+              >
+                {[...Array(5)].map((_, rowIndex) => (
+                  <div key={rowIndex} className="relative w-full aspect-square">
+                    <Image
+                      src={`/images/${colIndex * 5 + rowIndex + 1}.webp`}
+                      alt={`Background ${colIndex * 5 + rowIndex + 1}`}
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
 
-        {/* Hero Content */}
-        <div className="relative z-20 flex-grow flex items-center justify-center px-5 py-8">
-          <div className="container m-auto flex flex-col md:flex-row items-center">
-            <div className="bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-lg shadow-md">
-              <h1 className="text-3xl md:text-5xl font-bold mb-6 text-white">
-                Throw away your Camera – Let AI Capture Your World!
-              </h1>
-              <p className="text-base md:text-xl mb-6 text-gray-200">
-                Revolutionize your memories with Photogen, powered by
-                state-of-the-art models and crafted by two AI enthusiasts. Say
-                goodbye to tedious photo shoots and hello to breathtaking images
-                and videos, all generated by AI right from your device.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link
-                  href="/flux_pro"
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Create AI Photo
-                </Link>
-                <Link
-                  href="/style-model"
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Style Virtual Model
-                </Link>
-                <Link
-                  href="/create-video"
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
-                >
-                  Create AI Video
-                </Link>
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+
+          {/* Hero Content */}
+          <div className="relative z-20 flex-grow flex items-center justify-center px-5 py-8">
+            <div className="container m-auto flex flex-col md:flex-row items-center">
+              <div className="bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-lg shadow-md">
+                <h1 className="text-3xl md:text-5xl font-bold mb-6 text-white">
+                  Throw away your Camera – Let AI Capture Your World!
+                </h1>
+                <p className="text-base md:text-xl mb-6 text-gray-200">
+                  Revolutionize your memories with Photogen, powered by
+                  state-of-the-art models and crafted by two AI enthusiasts. Say
+                  goodbye to tedious photo shoots and hello to breathtaking images
+                  and videos, all generated by AI right from your device.
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Link
+                    href="/flux_pro"
+                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Create AI Photo
+                  </Link>
+                  <Link
+                    href="/style-model"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Style Virtual Model
+                  </Link>
+                  <Link
+                    href="/create-video"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    Create AI Video
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Testimonials Section with Background Image Grid */}
-      <div className="relative">
-        <div className="absolute inset-0 z-0 w-full h-full">
-          <BackgroundImageGrid />
         </div>
 
         {/* Testimonials Section */}
-        <div className="relative z-10 bg-black bg-opacity-50 py-20">
-          <div className="container mx-auto px-5 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-lg mb-4 text-black">
-                  "Photogen has revolutionized my Instagram game! I can create
-                  stunning, professional-looking photos in minutes. It's like
-                  having a personal photographer in my pocket!"
-                </p>
-                <p className="font-bold text-black">- Sarah J., Influencer</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-lg mb-4 text-black">
-                  "As a small business owner, Photogen has been a game-changer
-                  for my product photography. I've saved so much time and money,
-                  and my sales have increased thanks to the high-quality
-                  images."
-                </p>
-                <p className="font-bold text-black">
-                  - Mike T., E-commerce Entrepreneur
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-lg mb-4 text-black">
-                  "I'm not a professional photographer, but Photogen makes me
-                  feel like one. It's incredibly easy to use, and the results
-                  are always impressive. My family photos have never looked
-                  better!"
-                </p>
-                <p className="font-bold text-black">
-                  - Emily R., Hobbyist Photographer
-                </p>
+        <div className="relative">
+          <div className="absolute inset-0 z-0 w-full h-full">
+            <BackgroundImageGrid />
+          </div>
+
+          <div className="relative z-10 bg-black bg-opacity-50 py-20">
+            <div className="container mx-auto px-5 relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <p className="text-lg mb-4 text-black">
+                    "Photogen has revolutionized my Instagram game! I can create
+                    stunning, professional-looking photos in minutes. It's like
+                    having a personal photographer in my pocket!"
+                  </p>
+                  <p className="font-bold text-black">- Sarah J., Influencer</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <p className="text-lg mb-4 text-black">
+                    "As a small business owner, Photogen has been a game-changer
+                    for my product photography. I've saved so much time and money,
+                    and my sales have increased thanks to the high-quality
+                    images."
+                  </p>
+                  <p className="font-bold text-black">
+                    - Mike T., E-commerce Entrepreneur
+                  </p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <p className="text-lg mb-4 text-black">
+                    "I'm not a professional photographer, but Photogen makes me
+                    feel like one. It's incredibly easy to use, and the results
+                    are always impressive. My family photos have never looked
+                    better!"
+                  </p>
+                  <p className="font-bold text-black">
+                    - Emily R., Hobbyist Photographer
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Empty space to extend the background image grid */}
-        <div className="h-40"></div>
-      </div>
-
-      {/* Why Choose Photogen Section */}
-      <div className="relative z-10 bg-black text-white py-20">
-        <div className="container mx-auto px-5">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">
-            Why Choose Photogen?
-          </h2>
-          <p className="text-lg md:text-xl mb-6">
-            Photogen offers cutting-edge AI models to help you create stunning
-            photos and videos effortlessly. Our models are trained on diverse
-            datasets to ensure high-quality results for any type of image or
-            video you want to create.
-          </p>
-          <p className="text-lg md:text-xl mb-6">
-            Whether you're a professional content creator or just someone who
-            loves capturing memories, Photogen has the tools you need to bring
-            your vision to life.
-          </p>
+        {/* Why Choose Photogen Section */}
+        <div className="relative z-10 bg-black text-white py-20">
+          <div className="container mx-auto px-5">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8">
+              Why Choose Photogen?
+            </h2>
+            <p className="text-lg md:text-xl mb-6">
+              Photogen offers cutting-edge AI models to help you create stunning
+              photos and videos effortlessly. Our models are trained on diverse
+              datasets to ensure high-quality results for any type of image or
+              video you want to create.
+            </p>
+            <p className="text-lg md:text-xl mb-6">
+              Whether you're a professional content creator or just someone who
+              loves capturing memories, Photogen has the tools you need to bring
+              your vision to life.
+            </p>
+          </div>
         </div>
-      </div>
+
+        {/* Choose Your Plan Section */}
+        <div className="bg-gray-100 py-12">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-8">Choose Your Plan</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <SubscriptionPlan
+                title="Basic Plan"
+                price={99}
+                features={[
+                  "100 AI Photos/mo",
+                  "1 AI Model",
+                  "Basic editing"
+                ]}
+                link="https://buy.stripe.com/4gwg0DfAaeNta889AB"
+              />
+              <SubscriptionPlan
+                title="Pro Plan"
+                price={199}
+                features={[
+                  "1,000 AI Photos/mo",
+                  "3 AI Models",
+                  "Advanced editing"
+                ]}
+                link="https://buy.stripe.com/aEUeWz1JkfRxfss144"
+              />
+            </div>
+          </div>
+        </div>
+      </main>
 
       {/* Static Footer */}
       <footer className="bg-gray-900 text-white py-6 relative z-10">
