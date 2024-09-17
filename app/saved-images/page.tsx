@@ -8,6 +8,7 @@ import Image from "next/image";
 interface SavedImage {
   id: string;
   image_url: string;
+  s3_url: string;
 }
 
 const SavedImagesPage = () => {
@@ -55,10 +56,10 @@ const SavedImagesPage = () => {
               className="relative h-64 rounded-lg overflow-hidden"
             >
               <Image
-                src={image.image_url}
+                src={image.s3_url}
                 alt="Saved image"
-                layout="fill"
-                objectFit="cover"
+                fill
+                style={{ objectFit: "cover" }}
               />
             </div>
           ))}

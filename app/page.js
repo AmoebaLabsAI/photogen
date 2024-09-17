@@ -31,8 +31,8 @@ export default function LandingPage() {
                   <Image
                     src={`/images/${colIndex * 5 + rowIndex + 1}.webp`}
                     alt={`Background ${colIndex * 5 + rowIndex + 1}`}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    style={{ objectFit: "cover" }}
                   />
                 </div>
               ))}
