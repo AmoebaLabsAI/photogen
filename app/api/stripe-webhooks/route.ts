@@ -36,27 +36,21 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const preSessionId = session.client_reference_id;
+    const userId = session.metadata?.user_id;
 
-    if (!preSessionId) {
-      console.error("No pre-session ID found in session");
-      return NextResponse.json(
-        { error: "No pre-session ID found" },
-        { status: 400 }
-      );
+    if (!userId) {
+      console.error("No user ID found in session metadata");
+      return NextResponse.json({ error: "No user ID found" }, { status: 400 });
     }
 
     try {
-      // Find the user by pre-session ID
+      // Find the user by ID
       const result = await sql`
-        SELECT users.id, users.email 
-        FROM users 
-        JOIN pre_sessions ON users.id = pre_sessions.user_id 
-        WHERE pre_sessions.id = ${preSessionId}
+        SELECT id, email FROM users WHERE id = ${userId}
       `;
 
       if (result.rows.length === 0) {
-        console.error("No user found for pre-session ID:", preSessionId);
+        console.error("No user found with ID:", userId);
         return NextResponse.json(
           { error: "No matching user found" },
           { status: 400 }
@@ -74,6 +68,7 @@ export async function POST(req: Request) {
         ON CONFLICT (user_id) 
         DO UPDATE SET 
           subscription_status = 'active',
+          stripe_customer_id = ${session.customer as string},
           stripe_subscription_id = ${session.subscription as string},
           updated_at = CURRENT_TIMESTAMP
       `;
@@ -83,11 +78,6 @@ export async function POST(req: Request) {
         UPDATE users
         SET subscription_tier = 'pro'
         WHERE id = ${user.id};
-      `;
-
-      // Delete the pre-session
-      await sql`
-        DELETE FROM pre_sessions WHERE id = ${preSessionId}
       `;
 
       console.log(`Subscription updated for user with ID: ${user.id}`);

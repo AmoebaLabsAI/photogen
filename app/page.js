@@ -4,38 +4,56 @@ import Link from "next/link";
 import Image from "next/image";
 import BackgroundImageGrid from "../src/components/BackgroundImageGrid";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 
-const SubscriptionPlan = ({ title, price, features, link }) => (
-  <div className="bg-white p-3 rounded-lg shadow-md">
-    <h3 className="text-lg font-bold mb-1">{title}</h3>
-    <p className="text-xl font-bold mb-2">
-      ${price}
-      <span className="text-xs font-normal">/mo</span>
-    </p>
-    <Link
-      href={link}
-      className="block w-full bg-purple-600 text-white text-center py-1 rounded-md text-sm mb-2"
-    >
-      Subscribe →
-    </Link>
-    <ul className="text-xs space-y-1">
-      {features.map((feature, index) => (
-        <li key={index} className="flex items-start">
-          <span className="text-green-500 mr-1">✓</span>
-          {feature}
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+const SubscriptionPlan = ({
+  title,
+  price,
+  features,
+  link,
+  userId,
+  userEmail,
+}) => {
+  const paymentLinkWithMetadata = `${link}?metadata[user_id]=${userId}&prefilled_email=${encodeURIComponent(
+    userEmail
+  )}`;
+
+  return (
+    <div className="bg-white p-3 rounded-lg shadow-md">
+      <h3 className="text-lg font-bold mb-1">{title}</h3>
+      <p className="text-xl font-bold mb-2">
+        ${price}
+        <span className="text-xs font-normal">/mo</span>
+      </p>
+      <Link
+        href={paymentLinkWithMetadata}
+        className="block w-full bg-purple-600 text-white text-center py-1 rounded-md text-sm mb-2"
+      >
+        Subscribe →
+      </Link>
+      <ul className="text-xs space-y-1">
+        {features.map((feature, index) => (
+          <li key={index} className="flex items-start">
+            <span className="text-green-500 mr-1">✓</span>
+            {feature}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 export default function LandingPage() {
-  const numberOfImages = 40;
+  const { user, isLoaded } = useUser();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (!mounted || !isLoaded) return null;
+
+  const userEmail = user?.primaryEmailAddress?.emailAddress || "";
 
   return (
     <div className="flex flex-col min-h-screen relative">
@@ -185,6 +203,8 @@ export default function LandingPage() {
               price={99}
               features={["100 AI Photos/mo", "1 AI Model", "Basic editing"]}
               link="https://buy.stripe.com/4gwg0DfAaeNta889AB"
+              userId={user?.id}
+              userEmail={userEmail}
             />
             <SubscriptionPlan
               title="Pro Plan"
@@ -195,6 +215,8 @@ export default function LandingPage() {
                 "Advanced editing",
               ]}
               link="https://buy.stripe.com/aEUeWz1JkfRxfss144"
+              userId={user?.id}
+              userEmail={userEmail}
             />
           </div>
         </div>
