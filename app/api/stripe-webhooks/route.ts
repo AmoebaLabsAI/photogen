@@ -2,21 +2,23 @@ import { NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 import Stripe from "stripe";
 
-export async function POST(req: Request) {
-  // Log the incoming request
-  console.log("Incoming Stripe webhook request:");
-  console.log("Headers:", Object.fromEntries(req.headers));
+// Configure Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2023-10-16", // Use the latest API version
+});
 
-  const body = await req.json();
-  console.log("Body:", body);
+export async function POST(req: Request) {
+  console.log("Incoming Stripe webhook request");
+
+  // Get the raw body as a buffer
+  const rawBody = await req.arrayBuffer();
+  const body = Buffer.from(rawBody).toString("utf8");
+
+  console.log("Raw body received");
 
   const sig = req.headers.get("stripe-signature") as string;
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: "2024-06-20",
-  });
-
-  let event;
+  let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(
