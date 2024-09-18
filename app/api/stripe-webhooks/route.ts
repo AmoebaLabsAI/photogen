@@ -1,47 +1,27 @@
 import { NextResponse } from "next/server";
-import { NextApiRequest } from "next";
 import { sql } from "@vercel/postgres";
 import Stripe from "stripe";
 
-export async function POST(req: NextApiRequest) {
-  // Configure Stripe
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-    apiVersion: "2024-06-20", // Use the latest API version
-  });
+// Configure Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2024-06-20",
+});
 
-  const buffer = (req: NextApiRequest) => {
-    return new Promise<Buffer>((resolve, reject) => {
-      const chunks: Buffer[] = [];
-
-      req.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      req.on("end", () => {
-        resolve(Buffer.concat(chunks));
-      });
-
-      req.on("error", reject);
-    });
-  };
-
+export async function POST(req: Request) {
   console.log("Incoming Stripe webhook request");
 
   // Get the raw body as a buffer
-  const body = await buffer(req);
+  const rawBody = await req.text();
 
   console.log("Raw body received");
 
-  const sig = req.headers["stripe-signature"];
-  if (typeof sig !== "string") {
-    throw new Error("Invalid stripe signature");
-  }
+  const sig = req.headers.get("stripe-signature") as string;
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(
-      body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
