@@ -34,58 +34,68 @@ export async function POST(req: Request) {
     );
   }
 
-  if (event.type === "customer.subscription.created") {
-    console.log(
-      "STRIPE_SECRET_KEY:",
-      process.env.STRIPE_SECRET_KEY ? "Set" : "Not set"
-    );
-    console.log("STRIPE_WEBHOOK_SECRET:", process.env.STRIPE_WEBHOOK_SECRET);
-    console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY);
-    const subscription = event.data.object as Stripe.Subscription;
-    console.log("subscription:", subscription);
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const preSessionId = session.client_reference_id;
 
-    const customer = (await stripe.customers.retrieve(
-      subscription.customer as string
-    )) as Stripe.Customer;
-    console.log("Customer data:", customer);
-    const email = customer.email;
+    if (!preSessionId) {
+      console.error("No pre-session ID found in session");
+      return NextResponse.json(
+        { error: "No pre-session ID found" },
+        { status: 400 }
+      );
+    }
 
-    if (email) {
-      try {
-        // Update the subscriptions table
-        await sql`
-          INSERT INTO subscriptions (email, subscription_status, stripe_customer_id, stripe_subscription_id)
-          VALUES (${email}, ${subscription.status}, ${
-          subscription.customer as string
-        }, ${subscription.id})
-          ON CONFLICT (email) 
-          DO UPDATE SET 
-            subscription_status = ${subscription.status},
-            stripe_customer_id = ${subscription.customer as string},
-            stripe_subscription_id = ${subscription.id},
-            updated_at = CURRENT_TIMESTAMP
-        `;
+    try {
+      // Find the user by pre-session ID
+      const result = await sql`
+        SELECT users.id, users.email 
+        FROM users 
+        JOIN pre_sessions ON users.id = pre_sessions.user_id 
+        WHERE pre_sessions.id = ${preSessionId}
+      `;
 
-        // Update the users table
-        await sql`
-          UPDATE users
-          SET subscription_tier = ${subscription.status}
-          WHERE email = ${email};
-        `;
-
-        console.log(`Subscription updated for user with email: ${email}`);
-      } catch (error) {
-        console.error("Error updating subscription:", error);
+      if (result.rows.length === 0) {
+        console.error("No user found for pre-session ID:", preSessionId);
         return NextResponse.json(
-          { error: "Error updating subscription" },
-          { status: 500 }
+          { error: "No matching user found" },
+          { status: 400 }
         );
       }
-    } else {
-      console.error("No email found for the customer");
+
+      const user = result.rows[0];
+
+      // Update the subscriptions table
+      await sql`
+        INSERT INTO subscriptions (user_id, subscription_status, stripe_customer_id, stripe_subscription_id)
+        VALUES (${user.id}, 'active', ${session.customer as string}, ${
+        session.subscription as string
+      })
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          subscription_status = 'active',
+          stripe_subscription_id = ${session.subscription as string},
+          updated_at = CURRENT_TIMESTAMP
+      `;
+
+      // Update the users table
+      await sql`
+        UPDATE users
+        SET subscription_tier = 'pro'
+        WHERE id = ${user.id};
+      `;
+
+      // Delete the pre-session
+      await sql`
+        DELETE FROM pre_sessions WHERE id = ${preSessionId}
+      `;
+
+      console.log(`Subscription updated for user with ID: ${user.id}`);
+    } catch (error) {
+      console.error("Error updating subscription:", error);
       return NextResponse.json(
-        { error: "No email found for the customer" },
-        { status: 400 }
+        { error: "Error updating subscription" },
+        { status: 500 }
       );
     }
   }
