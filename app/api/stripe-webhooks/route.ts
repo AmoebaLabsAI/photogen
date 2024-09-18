@@ -69,7 +69,7 @@ export async function POST(req: Request) {
         // Update the users table
         await sql`
           UPDATE users
-          SET subscription_tier = 'pro'
+          SET subscription_tier = ${subscription.status}
           WHERE email = ${email};
         `;
 
