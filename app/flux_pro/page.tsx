@@ -10,6 +10,7 @@ import Link from "next/link";
 export const maxDuration = 300; // Applies to the actions
 
 const FluxProPage: React.FC = () => {
+  // State variables
   const [prompt, setPrompt] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,8 +18,8 @@ const FluxProPage: React.FC = () => {
   const [limitReached, setLimitReached] = useState(false);
   const [imageCount, setImageCount] = useState(0);
 
+  // Fetch the user's current image count when the component mounts
   useEffect(() => {
-    // Fetch the user's current image count when the component mounts
     const fetchImageCount = async () => {
       if (user) {
         try {
@@ -36,6 +37,7 @@ const FluxProPage: React.FC = () => {
     fetchImageCount();
   }, [user]);
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isLoading || imageCount >= 5) return;
@@ -59,6 +61,7 @@ const FluxProPage: React.FC = () => {
     }
   };
 
+  // Handle Enter key press in textarea
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -66,6 +69,7 @@ const FluxProPage: React.FC = () => {
     }
   };
 
+  // Handle image download
   const handleDownload = (url: string) => {
     const link = document.createElement("a");
     link.href = url;
@@ -75,6 +79,7 @@ const FluxProPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Handle saving image to user's account
   const handleSaveImage = async (url: string) => {
     if (!user) return;
 
@@ -108,6 +113,7 @@ const FluxProPage: React.FC = () => {
       {/* Sidebar (top on mobile) */}
       <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
+          {/* Prompt input textarea */}
           <div className="mb-4">
             <textarea
               placeholder="Describe your vision"
@@ -117,6 +123,7 @@ const FluxProPage: React.FC = () => {
               className="w-full h-32 md:h-40 p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
             />
           </div>
+          {/* Generate button */}
           <button
             type="submit"
             disabled={isLoading || !prompt.trim() || imageCount >= 5}
@@ -124,11 +131,13 @@ const FluxProPage: React.FC = () => {
           >
             {isLoading ? <>Conjuring Image...</> : "Generate Magic"}
           </button>
+          {/* Remaining generations count */}
           <p className="mt-2 text-white">
             {imageCount < 5
               ? `${5 - imageCount} free generations remaining`
               : "Free generations limit reached"}
           </p>
+          {/* Subscription prompt when limit is reached */}
           {imageCount >= 5 && (
             <div className="mt-4 p-4 bg-white bg-opacity-20 rounded-xl">
               <p className="text-white">
@@ -145,6 +154,7 @@ const FluxProPage: React.FC = () => {
               </a>
             </div>
           )}
+          {/* Link to saved images */}
           <Link href="/saved-images" className="mt-4 text-white underline">
             Saved Images
           </Link>
@@ -154,11 +164,13 @@ const FluxProPage: React.FC = () => {
       {/* Main content (bottom on mobile) */}
       <div className="w-full md:w-3/4 p-4 md:p-6 flex-grow bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
         {isLoading ? (
+          // Loading indicator
           <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
             <Loader2 className="w-8 h-8 animate-spin text-white" />
             <p className="ml-2 text-lg text-white">Generating image...</p>
           </div>
         ) : imageUrls.length > 0 ? (
+          // Display generated images
           <div className="w-full h-full  items-center justify-center">
             {imageUrls.map((url, index) => (
               <div
@@ -174,12 +186,14 @@ const FluxProPage: React.FC = () => {
                   />
                 </div>
                 <div className="mt-4">
+                  {/* Download button */}
                   <button
                     onClick={() => handleDownload(url)}
                     className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
                   >
                     <ImageIcon className="mr-2" /> Download Image
                   </button>
+                  {/* Save button (only for logged-in users) */}
                   {user && (
                     <button
                       onClick={() => handleSaveImage(url)}
@@ -193,6 +207,7 @@ const FluxProPage: React.FC = () => {
             ))}
           </div>
         ) : (
+          // Placeholder when no image is generated
           <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
             <Sparkles className="w-8 h-8 text-white mr-2" />
             <p className="text-lg text-white">

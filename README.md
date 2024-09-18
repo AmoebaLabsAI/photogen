@@ -11,8 +11,8 @@ You can use this as a quick jumping-off point to build a web app using Replicate
 ## Noteworthy files
 
 - [app/page.js](app/page.js) - React frontend that renders the home page in the browser
-- [app/api/predictions/route.js](app/api/predictions/route.js) - API endpoint that calls Replicate's API to create a prediction
-- [app/api/predictions/[id]/route.js](app/api/predictions/[id]/route.js) - API endpoint that calls Replicate's API to get the prediction result
+- [app/api/clerk-webhook/route.js](app/api/clerk-webhook/route.js) - API endpoint that responds to incoming webhooks from Clerk when users sign up for the service
+- [app/api/stripe-webhooks/route.js](app/api/stripe-webhooks/route.js) - API endpoint that responds to incoming webhooks from Stripe when users purchase subscriptions
 - [app/api/webhooks/route.js](app/api/webhooks/route.js) - API endpoint that receives and validates webhooks from Replicate
 
 ## Running the app
@@ -45,7 +45,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 For detailed instructions on how to create and use this template, see [replicate.com/docs/get-started/nextjs](https://replicate.com/docs/get-started/nextjs)
 
-
 ## Webhooks
 
 Webhooks provide real-time updates about your predictions. When you create a prediction or training, specify a URL that you control and Replicate will send HTTP POST requests to that URL when the prediction is created, updated, and completed.
@@ -74,8 +73,20 @@ To test webhooks in development, you'll need to create a secure tunnel to your l
 Follow these steps to set up your development environment to validate incoming webhooks:
 
 1. Get your signing secret by running:
-    ```
-    curl -s -X GET -H "Authorization: Bearer $REPLICATE_API_TOKEN" https://api.replicate.com/v1/webhooks/default/secret
-    ```
+   ```
+   curl -s -X GET -H "Authorization: Bearer $REPLICATE_API_TOKEN" https://api.replicate.com/v1/webhooks/default/secret
+   ```
 1. Add this secret to `.env.local`, like this: `REPLICATE_WEBHOOK_SIGNING_SECRET=whsec_...`
 1. Now when you run a prediction, the webhook handler in [app/api/webhooks/route.js](app/api/webhooks/route.js) will verify the webhook.
+
+## Webhook Handling
+
+This application uses webhooks to handle real-time events from Clerk (for authentication) and Stripe (for payments).
+
+### Clerk Webhooks
+
+Clerk webhooks are used to synchronize user data with our database. The webhook endpoint is located at:
+
+```
+/
+```
