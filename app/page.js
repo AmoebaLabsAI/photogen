@@ -14,7 +14,7 @@ const SubscriptionPlan = ({
   userId,
   userEmail,
 }) => {
-  const paymentLinkWithMetadata = `${link}?metadata[user_id]=${userId}&prefilled_email=${encodeURIComponent(
+  const paymentLinkWithMetadata = `${link}?client_reference_id=${userId}&prefilled_email=${encodeURIComponent(
     userEmail
   )}`;
 
