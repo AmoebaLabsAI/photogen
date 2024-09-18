@@ -5,6 +5,30 @@ import Image from "next/image";
 import BackgroundImageGrid from "../src/components/BackgroundImageGrid";
 import { useEffect, useState } from "react";
 
+const SubscriptionPlan = ({ title, price, features, link }) => (
+  <div className="bg-white p-3 rounded-lg shadow-md">
+    <h3 className="text-lg font-bold mb-1">{title}</h3>
+    <p className="text-xl font-bold mb-2">
+      ${price}
+      <span className="text-xs font-normal">/mo</span>
+    </p>
+    <Link
+      href={link}
+      className="block w-full bg-purple-600 text-white text-center py-1 rounded-md text-sm mb-2"
+    >
+      Subscribe →
+    </Link>
+    <ul className="text-xs space-y-1">
+      {features.map((feature, index) => (
+        <li key={index} className="flex items-start">
+          <span className="text-green-500 mr-1">✓</span>
+          {feature}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 export default function LandingPage() {
   const numberOfImages = 40;
   const [mounted, setMounted] = useState(false);
@@ -31,8 +55,8 @@ export default function LandingPage() {
                   <Image
                     src={`/images/${colIndex * 5 + rowIndex + 1}.webp`}
                     alt={`Background ${colIndex * 5 + rowIndex + 1}`}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    style={{ objectFit: "cover" }}
                   />
                 </div>
               ))}
@@ -146,6 +170,33 @@ export default function LandingPage() {
             loves capturing memories, Photogen has the tools you need to bring
             your vision to life.
           </p>
+        </div>
+      </div>
+
+      {/* Choose Your Plan Section */}
+      <div className="bg-gray-100 py-12">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Choose Your Plan
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <SubscriptionPlan
+              title="Basic Plan"
+              price={99}
+              features={["100 AI Photos/mo", "1 AI Model", "Basic editing"]}
+              link="https://buy.stripe.com/4gwg0DfAaeNta889AB"
+            />
+            <SubscriptionPlan
+              title="Pro Plan"
+              price={199}
+              features={[
+                "1,000 AI Photos/mo",
+                "3 AI Models",
+                "Advanced editing",
+              ]}
+              link="https://buy.stripe.com/aEUeWz1JkfRxfss144"
+            />
+          </div>
         </div>
       </div>
 

@@ -169,8 +169,8 @@ const FluxProPage: React.FC = () => {
                   <Image
                     src={url}
                     alt={`Generated image ${index + 1}`}
-                    layout="fill"
-                    objectFit="contain"
+                    fill
+                    style={{ objectFit: "contain" }}
                   />
                 </div>
                 <div className="mt-4">

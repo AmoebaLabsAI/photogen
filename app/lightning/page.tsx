@@ -79,8 +79,8 @@ const LightningPage: React.FC = () => {
                     <Image
                       src={url}
                       alt={`Generated image ${index + 1}`}
-                      layout="fill"
-                      objectFit="contain"
+                      fill
+                      style={{ objectFit: "contain" }}
                       className="rounded-xl shadow-lg drop-shadow-md"
                     />
                   </div>
