@@ -1,12 +1,45 @@
-## Getting started with Next.js and Replicate
+# Photogen
 
-<img width="100%" alt="iguana" src="https://github.com/replicate/cog/assets/2289/1d8d005c-e4a1-4a9d-bd4c-b573fc121b37">
+Photogen is an open-source AI image generation website. It allows users to create images using the latest text-to-image models. The site is built using the following technologies:
 
-This is a [Next.js](https://nextjs.org/) template project that's preconfigured to work with Replicate's API.
+- Next.js as the React web application framework
+- Postgres as the database
+- Clerk as the authentication provider
+- Stripe as the billing provider
+- Tailwind CSS for styling
+- Amazon S3 for image storage
+- Replicate for image model APIs
+- Vercel for deployment
 
-It uses Next's newer [App Router](https://nextjs.org/docs/app) and [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components).
+## Environment Variables Setup
 
-You can use this as a quick jumping-off point to build a web app using Replicate's API, or you can recreate this codebase from scratch by following the guide at [replicate.com/docs/get-started/nextjs](https://replicate.com/docs/get-started/nextjs)
+In order to clone this repo, you will need to setup several environment variables. These can be obtained by signing up for the relevant services.
+
+- REPLICATE_API_TOKEN
+- AWS_REGION
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+- CLERK_SECRET_KEY
+- CLERK_ENCRYPTION_KEY="89a0d42c0213662e98c113771eb2ab71d0b01943a99ab7352c27dbcce5edc55e"
+- NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+- NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+- NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+- NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+- NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+- POSTGRES_URL
+- POSTGRES_PRISMA_URL
+- POSTGRES_URL_NON_POOLING
+- POSTGRES_USER
+- POSTGRES_HOST
+- POSTGRES_PASSWORD
+- POSTGRES_DATABASE
+- STRIPE_SECRET_KEY
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_hix4y0kxYKyS8nKKfFUtu7DJ00HRoWMDZN"
+- STRIPE_PRO_PRICE_ID="price_1PzYdqB1PoOPhnz87ZsgFJIb"
+- STRIPE_BASIC_PRICE_ID="price_1PzYdqB1PoOPhnz87ZsgFJIb"
+- STRIPE_WEBHOOK_SECRET="whsec_HDUBD08d124onIKmavskAxRXIpqxN1zS"
+- WEBHOOK_SECRET (from stripe)
 
 ## Noteworthy files
 
@@ -14,6 +47,22 @@ You can use this as a quick jumping-off point to build a web app using Replicate
 - [app/api/clerk-webhook/route.js](app/api/clerk-webhook/route.js) - API endpoint that responds to incoming webhooks from Clerk when users sign up for the service
 - [app/api/stripe-webhooks/route.js](app/api/stripe-webhooks/route.js) - API endpoint that responds to incoming webhooks from Stripe when users purchase subscriptions
 - [app/api/webhooks/route.js](app/api/webhooks/route.js) - API endpoint that receives and validates webhooks from Replicate
+
+## Webhook Handling
+
+### Clerk Webhooks
+
+- Handled in `app/api/clerk-webhook/route.ts`
+- Processes user creation events
+- Updates user information in the database
+- Sets initial subscription tier to 'free' in Clerk's private metadata
+
+### Stripe Webhooks
+
+- Handled in `app/api/stripe-webhooks/route.ts`
+- Processes successful checkout events
+- Updates user subscription information in the database
+- Determines and updates subscription tier based on the purchased product
 
 ## Running the app
 
@@ -29,12 +78,6 @@ Create a git-ignored text file for storing secrets like your API token:
 cp .env.example .env.local
 ```
 
-Add your [Replicate API token](https://replicate.com/account/api-tokens) to `.env.local`:
-
-```
-REPLICATE_API_TOKEN=<your-token-here>
-```
-
 Run the development server:
 
 ```console
@@ -42,51 +85,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-For detailed instructions on how to create and use this template, see [replicate.com/docs/get-started/nextjs](https://replicate.com/docs/get-started/nextjs)
-
-## Webhooks
-
-Webhooks provide real-time updates about your predictions. When you create a prediction or training, specify a URL that you control and Replicate will send HTTP POST requests to that URL when the prediction is created, updated, and completed.
-
-This app is set up to optionally request, receive, and validate webhooks.
-
-### How webhooks work
-
-1. You specify a webhook URL when creating a prediction in [app/api/predictions/[id]/route.js](app/api/predictions/[id]/route.js)
-1. Replicate sends POST requests to the handler in [app/api/webhooks/route.js](app/api/webhooks/route.js) as the prediction is updated.
-
-### Requesting and receiving webhooks
-
-To test webhooks in development, you'll need to create a secure tunnel to your local machine, so Replicate can send POST requests to it. Follow these steps:
-
-1. [Download and set up `ngrok`](https://replicate.com/docs/webhooks#testing-your-webhook-code), an open-source tool that creates a secure tunnel to your local machine so you can receive webhooks.
-1. Run ngrok to create a publicly accessible URL to your local machine: `ngrok http 3000`
-1. Copy the resulting ngrok.app URL and paste it into `.env.local`, like this: `NGROK_HOST="https://020228d056d0.ngrok.app"`.
-1. Leave ngrok running.
-1. In a separate terminal window, run the app with `npm run dev`
-1. Open [localhost:3000](http://localhost:3000) in your browser and enter a prompt to generate an image.
-1. Go to [replicate.com/webhooks](https://replicate.com/webhooks) to see your prediction status.
-
-### Validating incoming webhooks
-
-Follow these steps to set up your development environment to validate incoming webhooks:
-
-1. Get your signing secret by running:
-   ```
-   curl -s -X GET -H "Authorization: Bearer $REPLICATE_API_TOKEN" https://api.replicate.com/v1/webhooks/default/secret
-   ```
-1. Add this secret to `.env.local`, like this: `REPLICATE_WEBHOOK_SIGNING_SECRET=whsec_...`
-1. Now when you run a prediction, the webhook handler in [app/api/webhooks/route.js](app/api/webhooks/route.js) will verify the webhook.
-
-## Webhook Handling
-
-This application uses webhooks to handle real-time events from Clerk (for authentication) and Stripe (for payments).
-
-### Clerk Webhooks
-
-Clerk webhooks are used to synchronize user data with our database. The webhook endpoint is located at:
-
-```
-/
-```

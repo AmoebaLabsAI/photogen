@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import BackgroundImageGrid from "../src/components/BackgroundImageGrid";
+import BackgroundImageGrid from "../components/BackgroundImageGrid";
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 
