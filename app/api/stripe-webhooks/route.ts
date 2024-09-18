@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 import Stripe from "stripe";
 
-// Configure Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20",
-});
-
 export async function POST(req: Request) {
   console.log("Incoming Stripe webhook request");
+
+  // Configure Stripe
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: "2024-06-20",
+  });
 
   // Get the raw body as a buffer
   const rawBody = await req.text();
