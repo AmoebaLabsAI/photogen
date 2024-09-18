@@ -80,12 +80,13 @@ export async function POST(req: Request) {
 
       // Update the subscriptions table
       await sql`
-        INSERT INTO subscriptions (user_id, subscription_status, stripe_customer_id, stripe_subscription_id, subscription_tier)
-        VALUES (${user.id}, 'active', ${session.customer as string}, ${
-        session.subscription as string
-      }, ${subscriptionTier})
+        INSERT INTO subscriptions (user_id, email, subscription_status, stripe_customer_id, stripe_subscription_id, subscription_tier)
+        VALUES (${user.id}, ${user.email}, 'active', ${
+        session.customer as string
+      }, ${session.subscription as string}, ${subscriptionTier})
         ON CONFLICT (user_id) 
         DO UPDATE SET 
+          email = EXCLUDED.email,
           subscription_status = 'active',
           stripe_customer_id = ${session.customer as string},
           stripe_subscription_id = ${session.subscription as string},
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
       `;
 
       console.log(
-        `Subscription updated for user with ID: ${user.id}, Tier: ${subscriptionTier}`
+        `Subscription updated for user with ID: ${user.id}, Email: ${user.email}, Tier: ${subscriptionTier}`
       );
     } catch (error) {
       console.error("Error updating subscription:", error);
