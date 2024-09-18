@@ -35,7 +35,15 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "customer.subscription.created") {
+    console.log(
+      "STRIPE_SECRET_KEY:",
+      process.env.STRIPE_SECRET_KEY ? "Set" : "Not set"
+    );
+    console.log("STRIPE_WEBHOOK_SECRET:", process.env.STRIPE_WEBHOOK_SECRET);
+    console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY);
     const subscription = event.data.object as Stripe.Subscription;
+    console.log("subscription:", subscription);
+
     const customer = (await stripe.customers.retrieve(
       subscription.customer as string
     )) as Stripe.Customer;
