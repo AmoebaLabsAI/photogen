@@ -3,7 +3,13 @@ import { sql } from "@vercel/postgres";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
+  // Log the incoming request
+  console.log("Incoming Stripe webhook request:");
+  console.log("Headers:", Object.fromEntries(req.headers));
+
   const body = await req.text();
+  console.log("Body:", body);
+
   const sig = req.headers.get("stripe-signature") as string;
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
@@ -18,7 +24,9 @@ export async function POST(req: Request) {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
+    console.log("Constructed Stripe event:", event.type);
   } catch (err: any) {
+    console.error("Error constructing Stripe event:", err.message);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
@@ -30,7 +38,7 @@ export async function POST(req: Request) {
     const customer = (await stripe.customers.retrieve(
       subscription.customer as string
     )) as Stripe.Customer;
-    console.log(customer);
+    console.log("Customer data:", customer);
     const email = customer.email;
 
     if (email) {
@@ -73,5 +81,6 @@ export async function POST(req: Request) {
     }
   }
 
+  console.log("Webhook processed successfully");
   return NextResponse.json({ received: true });
 }
