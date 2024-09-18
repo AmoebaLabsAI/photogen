@@ -35,13 +35,31 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    console.log(session);
-    const userId = session.metadata?.user_id;
+    const sessionId = (event.data.object as Stripe.Checkout.Session).id;
+
+    // Retrieve the session with line_items expanded
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items"],
+    });
+
+    console.log("Full session data:", session);
+
+    const userId = session.client_reference_id;
 
     if (!userId) {
       console.error("No user ID found in session metadata");
       return NextResponse.json({ error: "No user ID found" }, { status: 400 });
+    }
+
+    // Determine the subscription tier
+    let subscriptionTier = "free";
+    if (session.line_items && session.line_items.data.length > 0) {
+      const productName = session.line_items.data[0].description?.toLowerCase();
+      if (productName?.includes("pro")) {
+        subscriptionTier = "pro";
+      } else if (productName?.includes("basic")) {
+        subscriptionTier = "basic";
+      }
     }
 
     try {
@@ -62,26 +80,29 @@ export async function POST(req: Request) {
 
       // Update the subscriptions table
       await sql`
-        INSERT INTO subscriptions (user_id, subscription_status, stripe_customer_id, stripe_subscription_id)
+        INSERT INTO subscriptions (user_id, subscription_status, stripe_customer_id, stripe_subscription_id, subscription_tier)
         VALUES (${user.id}, 'active', ${session.customer as string}, ${
         session.subscription as string
-      })
+      }, ${subscriptionTier})
         ON CONFLICT (user_id) 
         DO UPDATE SET 
           subscription_status = 'active',
           stripe_customer_id = ${session.customer as string},
           stripe_subscription_id = ${session.subscription as string},
+          subscription_tier = ${subscriptionTier},
           updated_at = CURRENT_TIMESTAMP
       `;
 
       // Update the users table
       await sql`
         UPDATE users
-        SET subscription_tier = 'pro'
+        SET subscription_tier = ${subscriptionTier}
         WHERE id = ${user.id};
       `;
 
-      console.log(`Subscription updated for user with ID: ${user.id}`);
+      console.log(
+        `Subscription updated for user with ID: ${user.id}, Tier: ${subscriptionTier}`
+      );
     } catch (error) {
       console.error("Error updating subscription:", error);
       return NextResponse.json(
