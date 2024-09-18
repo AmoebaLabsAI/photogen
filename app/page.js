@@ -201,7 +201,7 @@ export default function LandingPage() {
       </div>
 
       {/* Choose Your Plan Section */}
-      <div className="bg-gray-100 py-12">
+      <div className="bg-gray-100 py-12" id="subscribe">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8">
             Choose Your Plan

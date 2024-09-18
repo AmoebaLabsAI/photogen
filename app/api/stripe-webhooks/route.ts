@@ -41,6 +41,8 @@ export async function POST(req: Request) {
   }
 
   // Handle the 'checkout.session.completed' event
+  // ASSUMPTION: This event was triggered by the user clicking a Stripe Payment
+  // link from inside the web app, so we have forwarded the userId in the URL params of the Payment link
   // This event is triggered when a customer successfully completes the checkout process
   if (event.type === "checkout.session.completed") {
     const sessionId = (event.data.object as Stripe.Checkout.Session).id;

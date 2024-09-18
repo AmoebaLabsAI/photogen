@@ -147,7 +147,7 @@ const FluxProPage: React.FC = () => {
                 Please subscribe to our paid plan for unlimited generations!
               </p>
               <a
-                href="/subscribe"
+                href="/index#subscribe"
                 className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
               >
                 Subscribe Now
