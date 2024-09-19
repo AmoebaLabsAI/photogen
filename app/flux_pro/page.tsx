@@ -30,6 +30,7 @@ const FluxProPage: React.FC = () => {
           const response = await fetch("/api/user-image-count");
           if (response.ok) {
             const data = await response.json();
+            console.log(data);
             setRemainingGenerations(data.remainingGenerations);
             setSubscriptionTier(data.subscription_tier);
           }
@@ -128,6 +129,19 @@ const FluxProPage: React.FC = () => {
     }
   };
 
+  const getSubscriptionLimit = (tier: string | null) => {
+    switch (tier) {
+      case "pro":
+        return Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
+      case "basic":
+        return Number(
+          process.env.NEXT_PUBLIC_BASIC_PLAN_IMAGE_GENERATION_LIMIT
+        );
+      default:
+        return Number(process.env.NEXT_PUBLIC_FREE_PLAN_IMAGE_GENERATION_LIMIT);
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row h-screen">
       {/* Sidebar (top on mobile) */}
@@ -165,19 +179,23 @@ const FluxProPage: React.FC = () => {
             <div className="mt-4 p-4 bg-white bg-opacity-20 rounded-xl">
               <p className="text-white">
                 You've reached the limit of{" "}
-                {subscriptionTier === "pro" ? "50" : "10"} images.
+                {getSubscriptionLimit(subscriptionTier)} images.
               </p>
               <p className="text-white mt-2">
                 {subscriptionTier === "pro"
                   ? "You've used all your pro plan generations."
-                  : "Please upgrade your plan for more generations!"}
+                  : subscriptionTier === "basic"
+                  ? "Upgrade to Pro for more generations!"
+                  : "Upgrade to Basic or Pro for more generations!"}
               </p>
               {subscriptionTier !== "pro" && (
                 <button
                   onClick={() => router.push("/index#subscribe")}
                   className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
                 >
-                  Upgrade To Pro Now
+                  {subscriptionTier === "basic"
+                    ? "Upgrade To Pro"
+                    : "Upgrade Plan"}
                 </button>
               )}
             </div>
