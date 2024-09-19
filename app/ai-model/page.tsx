@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Loader2, ImageIcon, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function AIModelPage() {
+export default function CreateAIModel() {
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [triggerWord, setTriggerWord] = useState("");
@@ -29,14 +29,13 @@ export default function AIModelPage() {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create model");
-      }
-
       const data = await response.json();
-      console.log("Model created:", data);
-      toast.success("Model created successfully!");
-      router.push("/dashboard");
+
+      if (data.success) {
+        router.push(`/model-created?modelName=${data.modelName}&triggerWord=${data.triggerWord}`);
+      } else {
+        // ... error handling ...
+      }
     } catch (error) {
       console.error("Error creating model:", error);
       toast.error("Failed to create model. Please try again.");

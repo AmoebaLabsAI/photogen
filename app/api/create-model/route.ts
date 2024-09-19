@@ -79,7 +79,12 @@ export async function POST(req: Request) {
     console.log(`Training started: ${training.status}`);
     console.log(`Training URL: https://replicate.com/p/${training.id}`);
 
-    return NextResponse.json({ success: true, model, training });
+    return NextResponse.json({ 
+      success: true, 
+      modelName, 
+      triggerWord,
+      trainingId: training.id 
+    });
   } catch (error: any) {
     console.error("Error details:", error);
     return NextResponse.json({ message: error.message || "Server error" }, { status: 500 });
