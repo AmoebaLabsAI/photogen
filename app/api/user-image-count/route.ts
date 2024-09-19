@@ -21,7 +21,21 @@ export async function GET() {
     }
 
     const { subscription_tier, image_count } = result.rows[0];
-    const limit = subscription_tier === "pro" ? 50 : 10;
+    let limit = 0;
+
+    if (subscription_tier === "pro") {
+      limit = Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
+    }
+
+    if (subscription_tier === "basic") {
+      limit = Number(process.env.NEXT_PUBLIC_BASIC_PLAN_IMAGE_GENERATION_LIMIT);
+    }
+
+    if (subscription_tier === "free") {
+      limit = Number(process.env.NEXT_PUBLIC_FREE_PLAN_IMAGE_GENERATION_LIMIT);
+    }
+
+    console.log("limit: " + limit);
     const remainingGenerations = Math.max(0, limit - image_count);
 
     return NextResponse.json({
@@ -68,7 +82,12 @@ export async function POST() {
     }
 
     const { subscription_tier, image_count } = result.rows[0];
-    const limit = subscription_tier === "pro" ? 50 : 10;
+    const limit =
+      subscription_tier === "pro"
+        ? Number(process.env.PRO_PLAN_IMAGE_GENERATION_LIMIT)
+        : subscription_tier === "basic"
+        ? Number(process.env.BASIC_PLAN_IMAGE_GENERATION_LIMIT)
+        : Number(process.env.FREE_PLAN_IMAGE_GENERATION_LIMIT);
 
     if (image_count > limit) {
       return NextResponse.json(

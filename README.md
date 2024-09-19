@@ -40,6 +40,55 @@ In order to clone this repo, you will need to setup several environment variable
 - STRIPE_BASIC_PRICE_ID="price_1PzYdqB1PoOPhnz87ZsgFJIb"
 - STRIPE_WEBHOOK_SECRET="whsec_HDUBD08d124onIKmavskAxRXIpqxN1zS"
 - WEBHOOK_SECRET (from stripe)
+- PRO_PLAN_IMAGE_GENERATION_LIMIT
+- BASIC_PLAN_IMAGE_GENERATION_LIMIT
+- FREE_PLAN_IMAGE_GENERATION_LIMIT
+
+## SQL Setup
+
+Create the following tables in your database
+
+```sql
+-- Create users table
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    subscription_tier TEXT DEFAULT 'free'
+);
+
+-- Create subscriptions table
+CREATE TABLE subscriptions (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT UNIQUE REFERENCES users(id),
+    email TEXT NOT NULL,
+    subscription_status TEXT NOT NULL,
+    stripe_customer_id TEXT,
+    stripe_subscription_id TEXT,
+    subscription_tier TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create user_image_counts table
+CREATE TABLE user_image_counts (
+    user_id TEXT PRIMARY KEY REFERENCES users(id),
+    image_count INTEGER DEFAULT 0
+);
+
+-- Create images table
+CREATE TABLE images (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    image_url TEXT NOT NULL,
+    s3_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ## Noteworthy files
 
