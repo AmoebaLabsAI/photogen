@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
 import Stripe from "stripe";
+import { clerkClient } from "@clerk/nextjs/server";
 
 // Initialize Stripe with the secret key from environment variables
 // The '!' is a non-null assertion operator, telling TypeScript that we're sure STRIPE_SECRET_KEY is defined
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
   }
 
   // Handle the 'checkout.session.completed' event
+  // ASSUMPTION: This event was triggered by the user clicking a Stripe Payment
+  // link from inside the web app, so we have forwarded the userId in the URL params of the Payment link
   // This event is triggered when a customer successfully completes the checkout process
   if (event.type === "checkout.session.completed") {
     const sessionId = (event.data.object as Stripe.Checkout.Session).id;
@@ -106,6 +109,19 @@ export async function POST(req: Request) {
           subscription_tier = ${subscriptionTier},
           updated_at = CURRENT_TIMESTAMP
       `;
+
+      // Update the user's subscription tier in Clerk's privateMetadata
+      try {
+        await clerkClient.users.updateUser(userId, {
+          privateMetadata: {
+            subscription_tier: subscriptionTier,
+          },
+        });
+        console.log(`Updated Clerk metadata for user ${userId}`);
+      } catch (clerkError) {
+        console.error("Error updating Clerk metadata:", clerkError);
+        // Note: We're not returning here, as we want to continue with the process even if Clerk update fails
+      }
 
       // Update the user's subscription tier in the users table
       await sql`

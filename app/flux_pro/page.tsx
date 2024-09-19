@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Loader2, ImageIcon, Sparkles, Save } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export const maxDuration = 300; // Applies to the actions
 
@@ -15,18 +16,22 @@ const FluxProPage: React.FC = () => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useUser();
-  const [limitReached, setLimitReached] = useState(false);
-  const [imageCount, setImageCount] = useState(0);
+  const [remainingGenerations, setRemainingGenerations] = useState<
+    number | null
+  >(null);
+  const router = useRouter();
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   // Fetch the user's current image count when the component mounts
   useEffect(() => {
     const fetchImageCount = async () => {
       if (user) {
         try {
-          const response = await fetch("/api/get-image-count");
+          const response = await fetch("/api/user-image-count");
           if (response.ok) {
             const data = await response.json();
-            setImageCount(data.imageCount);
+            setRemainingGenerations(data.remainingGenerations);
+            setSubscriptionTier(data.subscription_tier);
           }
         } catch (error) {
           console.error("Error fetching image count:", error);
@@ -40,9 +45,25 @@ const FluxProPage: React.FC = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim() || isLoading || imageCount >= 5) return;
+    if (!prompt.trim() || isLoading || remainingGenerations === 0) return;
     setIsLoading(true);
     try {
+      // Check and update image count
+      const countResponse = await fetch("/api/user-image-count", {
+        method: "POST",
+      });
+      if (!countResponse.ok) {
+        if (countResponse.status === 403) {
+          setRemainingGenerations(0);
+          throw new Error("Image generation limit reached");
+        }
+        throw new Error("Failed to update image count");
+      }
+      const countData = await countResponse.json();
+      setRemainingGenerations(countData.remainingGenerations);
+      setSubscriptionTier(countData.subscription_tier);
+
+      // Generate image
       console.log("Calling generateFluxProImage with prompt:", prompt);
       const result = await generateFluxProImage(prompt);
       console.log("Result from generateFluxProImage:", result);
@@ -52,7 +73,6 @@ const FluxProPage: React.FC = () => {
       }
 
       setImageUrls(Array.isArray(result) ? result : [result]);
-      setImageCount((prevCount) => prevCount + 1);
     } catch (error) {
       console.error("Error generating image:", error);
       alert(`Failed to generate image: ${error.message}`);
@@ -91,13 +111,13 @@ const FluxProPage: React.FC = () => {
       });
 
       if (response.status === 403) {
-        setLimitReached(true);
+        setRemainingGenerations(0);
         throw new Error("Image generation limit reached");
       }
 
       if (response.ok) {
         const data = await response.json();
-        setImageCount(data.imageCount);
+        setRemainingGenerations(data.remainingGenerations);
         alert("Image saved successfully!");
       } else {
         throw new Error("Failed to save image");
@@ -126,32 +146,40 @@ const FluxProPage: React.FC = () => {
           {/* Generate button */}
           <button
             type="submit"
-            disabled={isLoading || !prompt.trim() || imageCount >= 5}
+            disabled={isLoading || !prompt.trim() || remainingGenerations === 0}
             className="w-full bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? <>Conjuring Image...</> : "Generate Magic"}
           </button>
           {/* Remaining generations count */}
           <p className="mt-2 text-white">
-            {imageCount < 5
-              ? `${5 - imageCount} free generations remaining`
-              : "Free generations limit reached"}
+            {remainingGenerations !== null
+              ? `${remainingGenerations} generations remaining`
+              : "Loading..."}
+          </p>
+          <p className="mt-2 text-white">
+            Subscription: {subscriptionTier || "Loading..."}
           </p>
           {/* Subscription prompt when limit is reached */}
-          {imageCount >= 5 && (
+          {remainingGenerations === 0 && (
             <div className="mt-4 p-4 bg-white bg-opacity-20 rounded-xl">
               <p className="text-white">
-                You've reached the limit of 5 free images.
+                You've reached the limit of{" "}
+                {subscriptionTier === "pro" ? "50" : "10"} images.
               </p>
               <p className="text-white mt-2">
-                Please subscribe to our paid plan for unlimited generations!
+                {subscriptionTier === "pro"
+                  ? "You've used all your pro plan generations."
+                  : "Please upgrade your plan for more generations!"}
               </p>
-              <a
-                href="/subscribe"
-                className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
-              >
-                Subscribe Now
-              </a>
+              {subscriptionTier !== "pro" && (
+                <button
+                  onClick={() => router.push("/index#subscribe")}
+                  className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
+                >
+                  Upgrade To Pro Now
+                </button>
+              )}
             </div>
           )}
           {/* Link to saved images */}
