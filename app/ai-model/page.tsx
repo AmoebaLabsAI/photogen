@@ -1,92 +1,105 @@
 "use client";
 
 import React, { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Loader2, ImageIcon, Sparkles } from "lucide-react";
+import toast from "react-hot-toast";
 
-const AiModelPage: React.FC = () => {
-  const { user } = useUser();
+export default function AIModelPage() {
   const router = useRouter();
-  const [images, setImages] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [triggerWord, setTriggerWord] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const fileArray = Array.from(e.target.files).slice(0, 10);
-      setImages(fileArray);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (images.length === 0) {
-      setError("Please upload at least one image.");
-      return;
-    }
-    setIsUploading(true);
-    setError(null);
-    setSuccessMessage(null);
-
-    const formData = new FormData();
-    images.forEach((image) => formData.append("images", image));
+    setLoading(true);
 
     try {
+      const formData = new FormData();
+      images.forEach((image, index) => {
+        const file = dataURLtoFile(image, `image_${index + 1}.png`);
+        formData.append("images", file);
+      });
+      formData.append("triggerWord", triggerWord);
+
       const response = await fetch("/api/create-model", {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
-      if (data.success) {
-        setSuccessMessage("Model created successfully!");
-        router.push("/models");
-      } else {
-        setError(data.message || "Failed to create model.");
+
+      if (!response.ok) {
+        throw new Error("Failed to create model");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred.");
+
+      const data = await response.json();
+      console.log("Model created:", data);
+      toast.success("Model created successfully!");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error creating model:", error);
+      toast.error("Failed to create model. Please try again.");
     } finally {
-      setIsUploading(false);
+      setLoading(false);
     }
   };
 
+  const dataURLtoFile = (dataurl: string, filename: string): File => {
+    let arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)![1],
+        bstr = atob(arr[1]), 
+        n = bstr.length, 
+        u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, {type:mime});
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Create a New AI Model</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col">
-        <label className="mb-2 font-semibold">Upload Images (Max 10)</label>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="mb-4 p-2 border rounded"
-        />
-        {images.length > 0 && (
-          <div className="mb-4">
-            <p className="font-semibold">Selected Images:</p>
-            <ul className="list-disc list-inside">
-              {images.map((file, index) => (
-                <li key={index}>{file.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+    <div className="max-w-5xl mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold mb-4">Create AI Model</h1>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="triggerWord" className="block mb-2">Trigger Word</label>
+          <input
+            id="triggerWord"
+            type="text"
+            placeholder="Enter trigger word"
+            value={triggerWord}
+            onChange={(e) => setTriggerWord(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div>
+          <label className="block mb-2">Upload Images (Max 20)</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              files.forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setImages(current => [...current, reader.result as string]);
+                };
+                reader.readAsDataURL(file);
+              });
+            }}
+            disabled={images.length >= 20}
+            className="w-full p-2 border rounded"
+          />
+        </div>
         <button
           type="submit"
-          disabled={isUploading}
-          className={`px-4 py-2 bg-purple-600 text-white rounded ${
-            isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-purple-700"
-          }`}
+          disabled={loading || images.length === 0 || !triggerWord}
+          className="bg-blue-500 text-white p-2 rounded disabled:opacity-50"
         >
-          {isUploading ? "Uploading..." : "Create Model"}
+          {loading ? "Creating..." : "Create Model"}
         </button>
       </form>
     </div>
   );
-};
-
-export default AiModelPage;
+}
