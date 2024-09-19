@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // Prepare upload parameters for S3
     const uploadParams = {
-      Bucket: "photogen-saved-images",
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: filename,
       Body: Buffer.from(imageBuffer),
       ContentType: imageResponse.headers.get("content-type") || undefined,
