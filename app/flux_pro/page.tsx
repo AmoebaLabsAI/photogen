@@ -22,24 +22,23 @@ const FluxProPage: React.FC = () => {
   const router = useRouter();
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
+  const fetchImageCount = async () => {
+    if (user) {
+      try {
+        const response = await fetch("/api/user-image-count");
+        if (response.ok) {
+          const data = await response.json();
+          setRemainingGenerations(data.remainingGenerations);
+          setSubscriptionTier(data.subscription_tier);
+        }
+      } catch (error) {
+        console.error("Error fetching image count:", error);
+      }
+    }
+  };
+
   // Fetch the user's current image count when the component mounts
   useEffect(() => {
-    const fetchImageCount = async () => {
-      if (user) {
-        try {
-          const response = await fetch("/api/user-image-count");
-          if (response.ok) {
-            const data = await response.json();
-            console.log(data);
-            setRemainingGenerations(data.remainingGenerations);
-            setSubscriptionTier(data.subscription_tier);
-          }
-        } catch (error) {
-          console.error("Error fetching image count:", error);
-        }
-      }
-    };
-
     fetchImageCount();
   }, [user]);
 
@@ -49,10 +48,31 @@ const FluxProPage: React.FC = () => {
     if (!prompt.trim() || isLoading || remainingGenerations === 0) return;
     setIsLoading(true);
     try {
-      // Check and update image count
+      // Check remaining generations on the server
+      const checkResponse = await fetch("/api/user-image-count");
+      if (!checkResponse.ok) {
+        throw new Error("Failed to check remaining generations");
+      }
+      const checkData = await checkResponse.json();
+      if (checkData.remainingGenerations <= 0) {
+        setRemainingGenerations(0);
+        throw new Error("No generations remaining");
+      }
+
+      // Generate image
+      const result = await generateFluxProImage(prompt);
+
+      if (result === undefined || result === null) {
+        throw new Error("No result returned from generateFluxProImage");
+      }
+
+      setImageUrls(Array.isArray(result) ? result : [result]);
+
+      // Update image count and remaining generations after successful image generation
       const countResponse = await fetch("/api/user-image-count", {
         method: "POST",
       });
+
       if (!countResponse.ok) {
         if (countResponse.status === 403) {
           setRemainingGenerations(0);
@@ -63,17 +83,6 @@ const FluxProPage: React.FC = () => {
       const countData = await countResponse.json();
       setRemainingGenerations(countData.remainingGenerations);
       setSubscriptionTier(countData.subscription_tier);
-
-      // Generate image
-      console.log("Calling generateFluxProImage with prompt:", prompt);
-      const result = await generateFluxProImage(prompt);
-      console.log("Result from generateFluxProImage:", result);
-
-      if (result === undefined || result === null) {
-        throw new Error("No result returned from generateFluxProImage");
-      }
-
-      setImageUrls(Array.isArray(result) ? result : [result]);
     } catch (error) {
       console.error("Error generating image:", error);
       alert(`Failed to generate image: ${error.message}`);
