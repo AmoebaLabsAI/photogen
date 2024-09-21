@@ -145,5 +145,5 @@ export async function POST(req: Request) {
 
   // If everything went well, log success and return a 200 response
   console.log("Webhook processed successfully");
-  return NextResponse.json({ received: true });
+  return new Response("Webhook processed successfully", { status: 200 });
 }
