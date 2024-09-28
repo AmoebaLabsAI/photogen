@@ -31,8 +31,12 @@ export default function CreateAIModel() {
 
       const data = await response.json();
 
+      console.log(data);
+
       if (data.success) {
-        router.push(`/model-created?modelName=${data.modelName}&triggerWord=${data.triggerWord}`);
+        router.push(
+          `/model-created?modelName=${data.modelName}&triggerWord=${data.triggerWord}&trainingID=${data.trainingId}`
+        );
       } else {
         // ... error handling ...
       }
@@ -45,15 +49,15 @@ export default function CreateAIModel() {
   };
 
   const dataURLtoFile = (dataurl: string, filename: string): File => {
-    let arr = dataurl.split(','),
-        mime = arr[0].match(/:(.*?);/)![1],
-        bstr = atob(arr[1]), 
-        n = bstr.length, 
-        u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
+    let arr = dataurl.split(","),
+      mime = arr[0].match(/:(.*?);/)![1],
+      bstr = atob(arr[1]),
+      n = bstr.length,
+      u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
-    return new File([u8arr], filename, {type:mime});
+    return new File([u8arr], filename, { type: mime });
   };
 
   return (
@@ -61,7 +65,9 @@ export default function CreateAIModel() {
       <h1 className="text-2xl font-bold mb-4">Create AI Model</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label htmlFor="triggerWord" className="block mb-2">Trigger Word</label>
+          <label htmlFor="triggerWord" className="block mb-2">
+            Trigger Word
+          </label>
           <input
             id="triggerWord"
             type="text"
@@ -79,10 +85,10 @@ export default function CreateAIModel() {
             multiple
             onChange={(e) => {
               const files = Array.from(e.target.files || []);
-              files.forEach(file => {
+              files.forEach((file) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                  setImages(current => [...current, reader.result as string]);
+                  setImages((current) => [...current, reader.result as string]);
                 };
                 reader.readAsDataURL(file);
               });

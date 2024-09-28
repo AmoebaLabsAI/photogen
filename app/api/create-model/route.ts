@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import Replicate from "replicate";
 import JSZip from "jszip";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { sql } from "@vercel/postgres";
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
@@ -18,7 +19,8 @@ const s3Client = new S3Client({
 });
 
 const OWNER = "amoebalabsai";
-const TRAINING_VERSION = "885394e6a31c6f349dd4f9e6e7ffbabd8d9840ab2559ab78aed6b2451ab2cfef";
+const TRAINING_VERSION =
+  "885394e6a31c6f349dd4f9e6e7ffbabd8d9840ab2559ab78aed6b2451ab2cfef";
 
 export async function POST(req: Request) {
   console.log("Starting POST request processing");
@@ -31,10 +33,12 @@ export async function POST(req: Request) {
   try {
     console.log("Parsing form data");
     const formData = await req.formData();
-    const files = formData.getAll('images') as File[];
-    const triggerWord = formData.get('triggerWord') as string;
+    const files = formData.getAll("images") as File[];
+    const triggerWord = formData.get("triggerWord") as string;
 
-    console.log(`Received ${files.length} files and trigger word: "${triggerWord}"`);
+    console.log(
+      `Received ${files.length} files and trigger word: "${triggerWord}"`
+    );
 
     if (files.length === 0) throw new Error("No images uploaded");
     if (files.length > 20) throw new Error("Maximum 20 images allowed");
@@ -42,11 +46,13 @@ export async function POST(req: Request) {
 
     console.log("Creating zip file");
     const zip = new JSZip();
-    await Promise.all(files.map(async (file, index) => {
-      console.log(`Processing file ${index + 1}: ${file.name}`);
-      const buffer = await file.arrayBuffer();
-      zip.file(`image_${index + 1}.${file.name.split('.').pop()}`, buffer);
-    }));
+    await Promise.all(
+      files.map(async (file, index) => {
+        console.log(`Processing file ${index + 1}: ${file.name}`);
+        const buffer = await file.arrayBuffer();
+        zip.file(`image_${index + 1}.${file.name.split(".").pop()}`, buffer);
+      })
+    );
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
     console.log("Zip file created successfully");
 
@@ -56,12 +62,14 @@ export async function POST(req: Request) {
 
     console.log(`Uploading zip file to S3: ${s3Key}`);
     // Upload zip file to S3
-    await s3Client.send(new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: s3Key,
-      Body: zipBuffer,
-      ContentType: 'application/zip',
-    }));
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: s3Key,
+        Body: zipBuffer,
+        ContentType: "application/zip",
+      })
+    );
     console.log("Zip file uploaded to S3 successfully");
 
     const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
@@ -69,15 +77,11 @@ export async function POST(req: Request) {
 
     console.log("Creating Replicate model");
     // Create the model
-    const model = await replicate.models.create(
-      OWNER,
-      modelName,
-      {
-        visibility: "public",
-        hardware: "gpu-t4",
-        description: "A fine-tuned FLUX.1 model",
-      }
-    );
+    const model = await replicate.models.create(OWNER, modelName, {
+      visibility: "public",
+      hardware: "gpu-t4",
+      description: "A fine-tuned FLUX.1 model",
+    });
 
     console.log(`Model created: ${modelName}`);
     console.log(`Model URL: https://replicate.com/${OWNER}/${modelName}`);
@@ -104,7 +108,7 @@ export async function POST(req: Request) {
           wandb_save_interval: 100,
           caption_dropout_rate: 0.05,
           cache_latents_to_disk: false,
-          wandb_sample_interval: 100
+          wandb_sample_interval: 100,
         },
       }
     );
@@ -112,15 +116,27 @@ export async function POST(req: Request) {
     console.log(`Training started: ${training.status}`);
     console.log(`Training URL: https://replicate.com/p/${training.id}`);
 
+    // Store model information in the database
+    console.log("Storing model information in the database");
+    await sql`
+      INSERT INTO models (id, user_id, trainingid, model_name, trigger_word)
+      VALUES (${modelId}, ${userId}, ${training.id}, ${modelName}, ${triggerWord})
+    `;
+    console.log("Model information stored successfully");
+
     console.log("Returning success response");
-    return NextResponse.json({ 
-      success: true, 
-      modelName, 
+    return NextResponse.json({
+      success: true,
+      modelId,
+      modelName,
       triggerWord,
-      trainingId: training.id 
+      trainingId: training.id,
     });
   } catch (error: any) {
     console.error("Error details:", error);
-    return NextResponse.json({ message: error.message || "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message || "Server error" },
+      { status: 500 }
+    );
   }
 }
