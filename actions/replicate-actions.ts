@@ -19,27 +19,17 @@ export async function generateFluxImage(prompt: string) {
 
 export async function generateAIModelImage(
   prompt: string,
-  modelName: string,
-  trainingId: string
+  url: `${string}/${string}`
 ) {
-  const output = await replicate.run(
-    `amoebalabsai/${modelName}:${trainingId}`,
-    {
-      input: {
-        model: "schnell",
-        prompt: prompt,
-        lora_scale: 1,
-        num_outputs: 1,
-        aspect_ratio: "1:1",
-        output_format: "webp",
-        guidance_scale: 3.5,
-        output_quality: 90,
-        prompt_strength: 0.8,
-        extra_lora_scale: 1,
-        num_inference_steps: 28,
-      },
-    }
-  );
+  const output = await replicate.run(url, {
+    input: {
+      prompt: prompt,
+      num_outputs: 1,
+      aspect_ratio: "1:1",
+      output_format: "webp",
+      output_quality: 90,
+    },
+  });
 
   return output;
 }
