@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // Prepare upload parameters for S3
     const uploadParams = {
-      Bucket: "photogen-saved-images",
+      Bucket: process.env.AWS_SAVED_IMAGES_BUCKET_NAME,
       Key: filename,
       Body: Buffer.from(imageBuffer),
       ContentType: imageResponse.headers.get("content-type") || undefined,
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     await s3Client.send(new PutObjectCommand(uploadParams));
 
     // Generate the S3 URL for the uploaded image
-    const s3Url = `https://photogen-saved-images.s3.amazonaws.com/${filename}`;
+    const s3Url = `https://${process.env.AWS_SAVED_IMAGES_BUCKET_NAME}.s3.amazonaws.com/${filename}`;
 
     // Save image metadata to the database
     const result = await sql`

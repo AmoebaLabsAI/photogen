@@ -17,6 +17,23 @@ export async function generateFluxImage(prompt: string) {
   return output;
 }
 
+export async function generateAIModelImage(
+  prompt: string,
+  url: `${string}/${string}`
+) {
+  const output = await replicate.run(url, {
+    input: {
+      prompt: prompt,
+      num_outputs: 1,
+      aspect_ratio: "1:1",
+      output_format: "webp",
+      output_quality: 90,
+    },
+  });
+
+  return output;
+}
+
 export async function generateFluxProImage(prompt: string) {
   const input = {
     prompt: prompt,
