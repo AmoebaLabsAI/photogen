@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
-import { generateAIModelImage } from "../../actions/replicate-actions";
-import Replicate from "replicate";
+import { toast } from "react-hot-toast";
 
 interface Model {
   id: string;
   model_name: string;
   trigger_word: string;
-  trainingid: string; // Updated to include training_id
+  trainingid: string;
 }
 
 export default function CreateImage() {
@@ -18,12 +17,8 @@ export default function CreateImage() {
   const [models, setModels] = useState<Model[]>([]);
   const [selectedModel, setSelectedModel] = useState<string>("");
   const [prompt, setPrompt] = useState<string>("");
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null); // New state to hold the generated image
-  const [isLoading, setIsLoading] = useState(false); // New state to handle loading state
-
-  const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN,
-  });
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -36,35 +31,23 @@ export default function CreateImage() {
       const response = await fetch("/api/models");
       if (!response.ok) throw new Error("Failed to fetch models");
       const data = await response.json();
-      console.log(data);
       setModels(data);
     } catch (error) {
       console.error("Error fetching models:", error);
-    }
-  };
-
-  const getVersionId = async (trainingId: string) => {
-    try {
-      const response = await fetch(`/api/trainings?trainingID=${trainingId}`);
-      if (!response.ok) throw new Error("Failed to fetch version ID");
-      const data = await response.json();
-      return data.versionId;
-    } catch (error) {
-      console.error("Error fetching version ID:", error);
-      throw error;
+      toast.error("Failed to fetch models. Please try again.");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedModel || !prompt) {
-      alert("Please select a model and enter a prompt.");
+      toast.error("Please select a model and enter a prompt.");
       return;
     }
 
     const model = models.find((m) => m.model_name === selectedModel);
     if (!model) {
-      alert("Selected model not found.");
+      toast.error("Selected model not found.");
       return;
     }
 
@@ -72,13 +55,43 @@ export default function CreateImage() {
     setGeneratedImage(null);
 
     try {
-      const url = await getVersionId(model.trainingid);
+      const response = await fetch("/api/generate-model-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, modelId: model.trainingid }),
+      });
 
-      const output = await generateAIModelImage(prompt, url);
-      setGeneratedImage(output[0]);
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          const data = JSON.parse(line);
+          if (data.status === "processing") {
+            toast.loading("Image generation in progress...");
+          } else if (data.imageUrl) {
+            setGeneratedImage(data.imageUrl);
+            toast.success("Image generated successfully!");
+          } else if (data.error) {
+            throw new Error(data.error);
+          }
+        }
+      }
     } catch (error) {
       console.error("Error generating image:", error);
-      alert("Failed to generate image. Please try again.");
+      toast.error(
+        error.message || "Failed to generate image. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }

@@ -19,9 +19,9 @@ export async function generateFluxImage(prompt: string) {
 
 export async function generateAIModelImage(
   prompt: string,
-  url: `${string}/${string}`
+  versionId: `${string}/${string}` | `${string}/${string}:${string}`
 ) {
-  const output = await replicate.run(url, {
+  const output = await replicate.run(versionId, {
     input: {
       prompt: prompt,
       num_outputs: 1,
