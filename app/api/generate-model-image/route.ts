@@ -4,6 +4,8 @@ import { getVersionId } from "../../../lib/replicate";
 
 export const runtime = "edge";
 
+const MAX_TIMEOUT = 55000; // 55 seconds, just under Vercel's 60-second limit
+
 export async function POST(request: Request) {
   const { prompt, modelId } = await request.json();
 
@@ -14,9 +16,12 @@ export async function POST(request: Request) {
     // Start the image generation process
     const generationPromise = generateAIModelImage(prompt, versionId as any);
 
-    // Set up a timeout (adjust as needed)
+    // Set up a timeout
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Image generation timed out")), 120000)
+      setTimeout(
+        () => reject(new Error("Image generation timed out")),
+        MAX_TIMEOUT
+      )
     );
 
     // Race between the generation and the timeout

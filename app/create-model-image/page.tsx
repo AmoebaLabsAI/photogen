@@ -63,6 +63,11 @@ export default function CreateImage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 504) {
+          throw new Error(
+            "Image generation timed out. Please try again with a simpler prompt or a different model."
+          );
+        }
         throw new Error(errorData.error || "Failed to generate image");
       }
 
