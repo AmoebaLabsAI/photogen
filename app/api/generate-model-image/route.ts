@@ -4,44 +4,49 @@ import { getVersionId } from "../../../lib/replicate";
 
 export const runtime = "edge";
 
-const MAX_TIMEOUT = 55000; // 55 seconds, just under Vercel's 60-second limit
-
 export async function POST(request: Request) {
   const { prompt, modelId } = await request.json();
 
-  try {
-    // Get the version ID
-    const versionId = await getVersionId(modelId);
+  // Create a new ReadableStream
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        // Send an initial response within 25 seconds
+        controller.enqueue(
+          encoder.encode(JSON.stringify({ status: "processing" }) + "\n")
+        );
 
-    // Start the image generation process
-    const generationPromise = generateAIModelImage(prompt, versionId as any);
+        // Get the version ID
+        const versionId = await getVersionId(modelId);
 
-    // Set up a timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("Image generation timed out")),
-        MAX_TIMEOUT
-      )
-    );
+        // Start the image generation process
+        const output = await generateAIModelImage(prompt, versionId as any);
 
-    // Race between the generation and the timeout
-    const output = await Promise.race([generationPromise, timeoutPromise]);
+        // Send the final result
+        controller.enqueue(
+          encoder.encode(JSON.stringify({ imageUrl: output[0] }) + "\n")
+        );
+      } catch (error) {
+        console.error("Error generating image:", error);
+        controller.enqueue(
+          encoder.encode(
+            JSON.stringify({ error: "Failed to generate image" }) + "\n"
+          )
+        );
+      } finally {
+        controller.close();
+      }
+    },
+  });
 
-    return NextResponse.json({ imageUrl: (output as string[])[0] });
-  } catch (error) {
-    console.error("Error generating image:", error);
-    if (error.message === "Image generation timed out") {
-      return NextResponse.json(
-        {
-          error:
-            "Image generation is taking longer than expected. Please try again.",
-        },
-        { status: 504 }
-      );
-    }
-    return NextResponse.json(
-      { error: "Failed to generate image" },
-      { status: 500 }
-    );
-  }
+  // Return a streaming response
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 }
+
+const encoder = new TextEncoder();

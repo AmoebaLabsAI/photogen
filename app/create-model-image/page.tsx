@@ -61,19 +61,32 @@ export default function CreateImage() {
         body: JSON.stringify({ prompt, modelId: model.trainingid }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (response.status === 504) {
-          throw new Error(
-            "Image generation timed out. Please try again with a simpler prompt or a different model."
-          );
-        }
-        throw new Error(errorData.error || "Failed to generate image");
+      if (!response.body) {
+        throw new Error("No response body");
       }
 
-      const data = await response.json();
-      setGeneratedImage(data.imageUrl);
-      toast.success("Image generated successfully!");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          const data = JSON.parse(line);
+          if (data.status === "processing") {
+            toast.loading("Image generation in progress...");
+          } else if (data.imageUrl) {
+            setGeneratedImage(data.imageUrl);
+            toast.success("Image generated successfully!");
+          } else if (data.error) {
+            throw new Error(data.error);
+          }
+        }
+      }
     } catch (error) {
       console.error("Error generating image:", error);
       toast.error(
