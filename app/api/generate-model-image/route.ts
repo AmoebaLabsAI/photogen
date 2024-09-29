@@ -2,9 +2,7 @@ import { NextResponse } from "next/server";
 import { generateAIModelImage } from "../../../actions/replicate-actions";
 import { getVersionId } from "../../../lib/replicate";
 
-export const config = {
-  runtime: "edge",
-};
+export const runtime = "edge";
 
 export async function POST(request: Request) {
   const { prompt, modelId } = await request.json();
