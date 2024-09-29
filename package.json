@@ -20,7 +20,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.438.0",
     "next": "^14.2.7",
-    "react": "18.2.0",
+    "react": "18.3.1",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.4.1",
     "replicate": "^0.29.4",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/formidable": "^3.4.5",
     "@types/node": "^22.5.2",
-    "@types/react": "18.3.7",
+    "@types/react": "18.3.10",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.44",
