@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Loader2, ImageIcon, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Model {
   id: string;
@@ -20,12 +21,33 @@ export default function CreateImage() {
   const [prompt, setPrompt] = useState<string>("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [remainingGenerations, setRemainingGenerations] = useState<
+    number | null
+  >(null);
+  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (isLoaded && user) {
       fetchModels();
+      fetchImageCount();
     }
   }, [isLoaded, user]);
+
+  const fetchImageCount = async () => {
+    if (user) {
+      try {
+        const response = await fetch("/api/user-image-count");
+        if (response.ok) {
+          const data = await response.json();
+          setRemainingGenerations(data.remainingGenerations);
+          setSubscriptionTier(data.subscription_tier);
+        }
+      } catch (error) {
+        console.error("Error fetching image count:", error);
+      }
+    }
+  };
 
   const fetchModels = async () => {
     try {
@@ -41,21 +63,27 @@ export default function CreateImage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedModel || !prompt) {
-      toast.error("Please select a model and enter a prompt.");
+    if (!selectedModel || !prompt || isLoading || remainingGenerations === 0)
       return;
-    }
-
-    const model = models.find((m) => m.model_name === selectedModel);
-    if (!model) {
-      toast.error("Selected model not found.");
-      return;
-    }
-
     setIsLoading(true);
-    setGeneratedImage(null);
-
     try {
+      // Check remaining generations on the server
+      const checkResponse = await fetch("/api/user-image-count");
+      if (!checkResponse.ok) {
+        throw new Error("Failed to check remaining generations");
+      }
+      const checkData = await checkResponse.json();
+      if (checkData.remainingGenerations <= 0) {
+        setRemainingGenerations(0);
+        throw new Error("No generations remaining");
+      }
+
+      // Generate image
+      const model = models.find((m) => m.model_name === selectedModel);
+      if (!model) {
+        throw new Error("Selected model not found.");
+      }
+
       const response = await fetch("/api/generate-model-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,6 +116,22 @@ export default function CreateImage() {
           }
         }
       }
+
+      // Update image count and remaining generations after successful image generation
+      const countResponse = await fetch("/api/user-image-count", {
+        method: "POST",
+      });
+
+      if (!countResponse.ok) {
+        if (countResponse.status === 403) {
+          setRemainingGenerations(0);
+          throw new Error("Image generation limit reached");
+        }
+        throw new Error("Failed to update image count");
+      }
+      const countData = await countResponse.json();
+      setRemainingGenerations(countData.remainingGenerations);
+      setSubscriptionTier(countData.subscription_tier);
     } catch (error) {
       console.error("Error generating image:", error);
       toast.error(
@@ -106,6 +150,19 @@ export default function CreateImage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+  };
+
+  const getSubscriptionLimit = (tier: string | null) => {
+    switch (tier) {
+      case "pro":
+        return Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
+      case "basic":
+        return Number(
+          process.env.NEXT_PUBLIC_BASIC_PLAN_IMAGE_GENERATION_LIMIT
+        );
+      default:
+        return Number(process.env.NEXT_PUBLIC_FREE_PLAN_IMAGE_GENERATION_LIMIT);
     }
   };
 
@@ -147,10 +204,47 @@ export default function CreateImage() {
           <button
             type="submit"
             className="w-full bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            disabled={isLoading || !prompt.trim() || remainingGenerations === 0}
           >
             {isLoading ? "Generating..." : "Generate Image"}
           </button>
+
+          {/* Remaining generations count */}
+          <p className="mt-2 text-white">
+            {remainingGenerations !== null
+              ? `${remainingGenerations} generations remaining`
+              : "Loading..."}
+          </p>
+          <p className="mt-2 text-white">
+            Subscription: {subscriptionTier || "Loading..."}
+          </p>
+
+          {/* Subscription prompt when limit is reached */}
+          {remainingGenerations === 0 && (
+            <div className="mt-4 p-4 bg-white bg-opacity-20 rounded-xl">
+              <p className="text-white">
+                You've reached the limit of{" "}
+                {getSubscriptionLimit(subscriptionTier)} images.
+              </p>
+              <p className="text-white mt-2">
+                {subscriptionTier === "pro"
+                  ? "You've used all your pro plan generations."
+                  : subscriptionTier === "basic"
+                  ? "Upgrade to Pro for more generations!"
+                  : "Upgrade to Basic or Pro for more generations!"}
+              </p>
+              {subscriptionTier !== "pro" && (
+                <button
+                  onClick={() => router.push("/index#subscribe")}
+                  className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
+                >
+                  {subscriptionTier === "basic"
+                    ? "Upgrade To Pro"
+                    : "Upgrade Plan"}
+                </button>
+              )}
+            </div>
+          )}
         </form>
       </div>
 

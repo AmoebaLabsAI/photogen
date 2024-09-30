@@ -109,35 +109,6 @@ const FluxProPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  // Handle saving image to user's account
-  const handleSaveImage = async (url: string) => {
-    if (!user) return;
-
-    try {
-      const response = await fetch("/api/save-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: url }),
-      });
-
-      if (response.status === 403) {
-        setRemainingGenerations(0);
-        throw new Error("Image generation limit reached");
-      }
-
-      if (response.ok) {
-        const data = await response.json();
-        setRemainingGenerations(data.remainingGenerations);
-        alert("Image saved successfully!");
-      } else {
-        throw new Error("Failed to save image");
-      }
-    } catch (error) {
-      console.error("Error saving image:", error);
-      alert("Failed to save image");
-    }
-  };
-
   const getSubscriptionLimit = (tier: string | null) => {
     switch (tier) {
       case "pro":
@@ -209,10 +180,6 @@ const FluxProPage: React.FC = () => {
               )}
             </div>
           )}
-          {/* Link to saved images */}
-          <Link href="/saved-images" className="mt-4 text-white underline">
-            Saved Images
-          </Link>
         </form>
       </div>
 
@@ -248,15 +215,6 @@ const FluxProPage: React.FC = () => {
                   >
                     <ImageIcon className="mr-2" /> Download Image
                   </button>
-                  {/* Save button (only for logged-in users) */}
-                  {user && (
-                    <button
-                      onClick={() => handleSaveImage(url)}
-                      className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
-                    >
-                      <Save className="mr-2" /> Save Image
-                    </button>
-                  )}
                 </div>
               </div>
             ))}
