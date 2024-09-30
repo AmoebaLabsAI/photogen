@@ -35,6 +35,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
     const triggerWord = formData.get("triggerWord") as string;
+    const modelName = formData.get("triggerWord") as string;
 
     console.log(
       `Received ${files.length} files and trigger word: "${triggerWord}"`
@@ -57,7 +58,6 @@ export async function POST(req: Request) {
     console.log("Zip file created successfully");
 
     const modelId = uuidv4();
-    const modelName = `flux-${modelId}`;
     const s3Key = `model-training-images/${modelName}.zip`;
 
     console.log(`Uploading zip file to S3: ${s3Key}`);
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     console.log("Creating Replicate model");
     // Create the model
     const model = await replicate.models.create(OWNER, modelName, {
-      visibility: "public",
+      visibility: "private",
       hardware: "gpu-t4",
       description: "A fine-tuned FLUX.1 model",
     });

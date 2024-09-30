@@ -1,26 +1,38 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { generateFluxProImage } from "../../actions/replicate-actions";
-import Image from "next/image";
-import { Loader2, ImageIcon, Sparkles, Save } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
+import Image from "next/image";
+import { toast } from "react-hot-toast";
+import { Loader2, ImageIcon, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export const maxDuration = 300; // Applies to the actions
+interface Model {
+  id: string;
+  model_name: string;
+  trigger_word: string;
+  trainingid: string;
+}
 
-const FluxProPage: React.FC = () => {
-  // State variables
-  const [prompt, setPrompt] = useState("");
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+export default function CreateImage() {
+  const { user, isLoaded } = useUser();
+  const [models, setModels] = useState<Model[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>("");
+  const [prompt, setPrompt] = useState<string>("");
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useUser();
   const [remainingGenerations, setRemainingGenerations] = useState<
     number | null
   >(null);
-  const router = useRouter();
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      fetchModels();
+      fetchImageCount();
+    }
+  }, [isLoaded, user]);
 
   const fetchImageCount = async () => {
     if (user) {
@@ -37,15 +49,22 @@ const FluxProPage: React.FC = () => {
     }
   };
 
-  // Fetch the user's current image count when the component mounts
-  useEffect(() => {
-    fetchImageCount();
-  }, [user]);
+  const fetchModels = async () => {
+    try {
+      const response = await fetch("/api/models");
+      if (!response.ok) throw new Error("Failed to fetch models");
+      const data = await response.json();
+      setModels(data);
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      toast.error("Failed to fetch models. Please try again.");
+    }
+  };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim() || isLoading || remainingGenerations === 0) return;
+    if (!selectedModel || !prompt || isLoading || remainingGenerations === 0)
+      return;
     setIsLoading(true);
     try {
       // Check remaining generations on the server
@@ -60,13 +79,43 @@ const FluxProPage: React.FC = () => {
       }
 
       // Generate image
-      const result = await generateFluxProImage(prompt);
-
-      if (result === undefined || result === null) {
-        throw new Error("No result returned from generateFluxProImage");
+      const model = models.find((m) => m.model_name === selectedModel);
+      if (!model) {
+        throw new Error("Selected model not found.");
       }
 
-      setImageUrls(Array.isArray(result) ? result : [result]);
+      const response = await fetch("/api/generate-model-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, modelId: model.trainingid }),
+      });
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n").filter(Boolean);
+
+        for (const line of lines) {
+          const data = JSON.parse(line);
+          if (data.status === "processing") {
+            toast.loading("Image generation in progress...");
+          } else if (data.imageUrl) {
+            setGeneratedImage(data.imageUrl);
+            toast.success("Image generated successfully!");
+          } else if (data.error) {
+            throw new Error(data.error);
+          }
+        }
+      }
 
       // Update image count and remaining generations after successful image generation
       const countResponse = await fetch("/api/user-image-count", {
@@ -85,28 +134,23 @@ const FluxProPage: React.FC = () => {
       setSubscriptionTier(countData.subscription_tier);
     } catch (error) {
       console.error("Error generating image:", error);
-      alert(`Failed to generate image: ${error.message}`);
+      toast.error(
+        error.message || "Failed to generate image. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Enter key press in textarea
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
+  const handleDownload = () => {
+    if (generatedImage) {
+      const link = document.createElement("a");
+      link.href = generatedImage;
+      link.download = "generated-image.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  };
-
-  // Handle image download
-  const handleDownload = (url: string) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "flux-pro-image.webp";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const getSubscriptionLimit = (tier: string | null) => {
@@ -122,29 +166,49 @@ const FluxProPage: React.FC = () => {
     }
   };
 
+  if (!isLoaded || !user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-screen">
       {/* Sidebar (top on mobile) */}
       <div className="w-full md:w-1/4 p-4 md:p-6 flex flex-col bg-gradient-to-br from-purple-400 via-pink-500 to-red-500">
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          {/* Prompt input textarea */}
+          <div className="mb-4">
+            <select
+              id="model"
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="w-full p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white bg-opacity-20 text-white"
+            >
+              <option value="">Select a model</option>
+              {models.map((model) => (
+                <option key={model.id} value={model.model_name}>
+                  {model.model_name} (Trigger: {model.trigger_word})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mb-4">
             <textarea
-              placeholder="Describe your vision"
+              id="prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={handleKeyDown}
+              placeholder="Enter your prompt"
               className="w-full h-32 md:h-40 p-2 border-2 border-white rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-70"
-            />
+            ></textarea>
           </div>
-          {/* Generate button */}
+
           <button
             type="submit"
-            disabled={isLoading || !prompt.trim() || remainingGenerations === 0}
             className="w-full bg-white bg-opacity-30 hover:bg-opacity-40 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !prompt.trim() || remainingGenerations === 0}
           >
-            {isLoading ? <>Conjuring Image...</> : "Generate Magic"}
+            {isLoading ? "Generating..." : "Generate Image"}
           </button>
+
           {/* Remaining generations count */}
           <p className="mt-2 text-white">
             {remainingGenerations !== null
@@ -154,6 +218,7 @@ const FluxProPage: React.FC = () => {
           <p className="mt-2 text-white">
             Subscription: {subscriptionTier || "Loading..."}
           </p>
+
           {/* Subscription prompt when limit is reached */}
           {remainingGenerations === 0 && (
             <div className="mt-4 p-4 bg-white bg-opacity-20 rounded-xl">
@@ -186,41 +251,30 @@ const FluxProPage: React.FC = () => {
       {/* Main content (bottom on mobile) */}
       <div className="w-full md:w-3/4 p-4 md:p-6 flex-grow bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 flex items-center justify-center overflow-hidden">
         {isLoading ? (
-          // Loading indicator
           <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
             <Loader2 className="w-8 h-8 animate-spin text-white" />
             <p className="ml-2 text-lg text-white">Generating image...</p>
           </div>
-        ) : imageUrls.length > 0 ? (
-          // Display generated images
-          <div className="w-full h-full  items-center justify-center">
-            {imageUrls.map((url, index) => (
-              <div
-                key={index}
-                className="w-full h-full flex flex-col items-center justify-center"
+        ) : generatedImage ? (
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <div className="relative w-full h-3/4">
+              <Image
+                src={generatedImage}
+                alt="Generated"
+                fill
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={handleDownload}
+                className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
               >
-                <div className="relative w-full h-3/4">
-                  <Image
-                    src={url}
-                    alt={`Generated image ${index + 1}`}
-                    fill
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-                <div className="mt-4">
-                  {/* Download button */}
-                  <button
-                    onClick={() => handleDownload(url)}
-                    className="inline-flex items-center px-6 py-2 bg-white bg-opacity-30 hover:bg-opacity-40 text-white rounded-lg transition-colors border-2 border-white"
-                  >
-                    <ImageIcon className="mr-2" /> Download Image
-                  </button>
-                </div>
-              </div>
-            ))}
+                <ImageIcon className="mr-2" /> Download Image
+              </button>
+            </div>
           </div>
         ) : (
-          // Placeholder when no image is generated
           <div className="flex items-center justify-center h-64 w-full bg-white bg-opacity-20 rounded-xl">
             <Sparkles className="w-8 h-8 text-white mr-2" />
             <p className="text-lg text-white">
@@ -231,6 +285,4 @@ const FluxProPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default FluxProPage;
+}

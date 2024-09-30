@@ -113,16 +113,16 @@ export default function LandingPage() {
                   Create AI Photo
                 </Link>
                 <Link
-                  href="/style-model"
+                  href="/create-fine-tune"
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
                 >
-                  Style Virtual Model
+                  Create AI Model
                 </Link>
                 <Link
-                  href="/create-video"
+                  href="/create-image-from-fine-tune"
                   className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
                 >
-                  Create AI Video
+                  Create Image Using AI Model
                 </Link>
               </div>
             </div>
