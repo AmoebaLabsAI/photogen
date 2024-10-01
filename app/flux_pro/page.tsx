@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { generateFluxProImage } from "../../actions/replicate-actions";
 import Image from "next/image";
-import { Loader2, ImageIcon, Sparkles, Save } from "lucide-react";
+import { Loader2, ImageIcon, Sparkles } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export const maxDuration = 300; // Applies to the actions
@@ -22,23 +21,22 @@ const FluxProPage: React.FC = () => {
   const router = useRouter();
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
-  const fetchImageCount = async () => {
-    if (user) {
-      try {
-        const response = await fetch("/api/user-image-count");
-        if (response.ok) {
-          const data = await response.json();
-          setRemainingGenerations(data.remainingGenerations);
-          setSubscriptionTier(data.subscription_tier);
-        }
-      } catch (error) {
-        console.error("Error fetching image count:", error);
-      }
-    }
-  };
-
   // Fetch the user's current image count when the component mounts
   useEffect(() => {
+    const fetchImageCount = async () => {
+      if (user) {
+        try {
+          const response = await fetch("/api/user-image-count");
+          if (response.ok) {
+            const data = await response.json();
+            setRemainingGenerations(data.remainingGenerations);
+            setSubscriptionTier(data.subscription_tier);
+          }
+        } catch (error) {
+          console.error("Error fetching image count:", error);
+        }
+      }
+    };
     fetchImageCount();
   }, [user]);
 

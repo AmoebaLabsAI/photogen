@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
 import { generateAIModelImage } from "../../../actions/replicate-actions";
 import { getVersionId } from "../../../lib/replicate";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const { prompt, modelId } = await request.json();
+  const { prompt, trainingId } = await request.json();
 
   // Create a new ReadableStream
   const stream = new ReadableStream({
@@ -17,7 +16,7 @@ export async function POST(request: Request) {
         );
 
         // Get the version ID
-        const versionId = await getVersionId(modelId);
+        const versionId = await getVersionId(trainingId);
 
         // Start the image generation process
         const output = await generateAIModelImage(prompt, versionId as any);

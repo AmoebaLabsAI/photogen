@@ -11,7 +11,7 @@ interface Model {
   id: string;
   model_name: string;
   trigger_word: string;
-  trainingid: string;
+  training_id: string;
 }
 
 export default function CreateImage() {
@@ -28,38 +28,36 @@ export default function CreateImage() {
   const router = useRouter();
 
   useEffect(() => {
+    const fetchImageCount = async () => {
+      if (user) {
+        try {
+          const response = await fetch("/api/user-image-count");
+          if (response.ok) {
+            const data = await response.json();
+            setRemainingGenerations(data.remainingGenerations);
+            setSubscriptionTier(data.subscription_tier);
+          }
+        } catch (error) {
+          console.error("Error fetching image count:", error);
+        }
+      }
+    };
+    const fetchModels = async () => {
+      try {
+        const response = await fetch("/api/models");
+        if (!response.ok) throw new Error("Failed to fetch models");
+        const data = await response.json();
+        setModels(data);
+      } catch (error) {
+        console.error("Error fetching models:", error);
+        toast.error("Failed to fetch models. Please try again.");
+      }
+    };
     if (isLoaded && user) {
       fetchModels();
       fetchImageCount();
     }
   }, [isLoaded, user]);
-
-  const fetchImageCount = async () => {
-    if (user) {
-      try {
-        const response = await fetch("/api/user-image-count");
-        if (response.ok) {
-          const data = await response.json();
-          setRemainingGenerations(data.remainingGenerations);
-          setSubscriptionTier(data.subscription_tier);
-        }
-      } catch (error) {
-        console.error("Error fetching image count:", error);
-      }
-    }
-  };
-
-  const fetchModels = async () => {
-    try {
-      const response = await fetch("/api/models");
-      if (!response.ok) throw new Error("Failed to fetch models");
-      const data = await response.json();
-      setModels(data);
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      toast.error("Failed to fetch models. Please try again.");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +85,7 @@ export default function CreateImage() {
       const response = await fetch("/api/generate-model-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, modelId: model.trainingid }),
+        body: JSON.stringify({ prompt, trainingId: model.training_id }),
       });
 
       if (!response.body) {
