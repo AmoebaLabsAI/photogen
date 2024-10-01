@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Loader2, ImageIcon, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 import { useUser } from "@clerk/nextjs";
 
@@ -18,25 +18,24 @@ export default function CreateAIModel() {
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchModelCount = async () => {
+      if (user) {
+        try {
+          const response = await fetch("/api/user-model-count");
+          if (response.ok) {
+            const data = await response.json();
+            setRemainingModels(data.remainingModels);
+            setSubscriptionTier(data.subscription_tier);
+          }
+        } catch (error) {
+          console.error("Error fetching model count:", error);
+        }
+      }
+    };
     if (isLoaded && user) {
       fetchModelCount();
     }
   }, [isLoaded, user]);
-
-  const fetchModelCount = async () => {
-    if (user) {
-      try {
-        const response = await fetch("/api/user-model-count");
-        if (response.ok) {
-          const data = await response.json();
-          setRemainingModels(data.remainingModels);
-          setSubscriptionTier(data.subscription_tier);
-        }
-      } catch (error) {
-        console.error("Error fetching model count:", error);
-      }
-    }
-  };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

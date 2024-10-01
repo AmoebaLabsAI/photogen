@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { generateAIModelImage } from "../../../actions/replicate-actions";
 import { getVersionId } from "../../../lib/replicate";
 

@@ -28,38 +28,36 @@ export default function CreateImage() {
   const router = useRouter();
 
   useEffect(() => {
+    const fetchImageCount = async () => {
+      if (user) {
+        try {
+          const response = await fetch("/api/user-image-count");
+          if (response.ok) {
+            const data = await response.json();
+            setRemainingGenerations(data.remainingGenerations);
+            setSubscriptionTier(data.subscription_tier);
+          }
+        } catch (error) {
+          console.error("Error fetching image count:", error);
+        }
+      }
+    };
+    const fetchModels = async () => {
+      try {
+        const response = await fetch("/api/models");
+        if (!response.ok) throw new Error("Failed to fetch models");
+        const data = await response.json();
+        setModels(data);
+      } catch (error) {
+        console.error("Error fetching models:", error);
+        toast.error("Failed to fetch models. Please try again.");
+      }
+    };
     if (isLoaded && user) {
       fetchModels();
       fetchImageCount();
     }
   }, [isLoaded, user]);
-
-  const fetchImageCount = async () => {
-    if (user) {
-      try {
-        const response = await fetch("/api/user-image-count");
-        if (response.ok) {
-          const data = await response.json();
-          setRemainingGenerations(data.remainingGenerations);
-          setSubscriptionTier(data.subscription_tier);
-        }
-      } catch (error) {
-        console.error("Error fetching image count:", error);
-      }
-    }
-  };
-
-  const fetchModels = async () => {
-    try {
-      const response = await fetch("/api/models");
-      if (!response.ok) throw new Error("Failed to fetch models");
-      const data = await response.json();
-      setModels(data);
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      toast.error("Failed to fetch models. Please try again.");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
