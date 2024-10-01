@@ -7,6 +7,7 @@ const replicate = new Replicate({
 export default replicate;
 
 export async function getVersionId(trainingId: string): Promise<string> {
+  console.log("trainingid: " + trainingId);
   try {
     const training = await replicate.trainings.get(trainingId);
     return training.output.version;

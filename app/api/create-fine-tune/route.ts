@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const files = formData.getAll("images") as File[];
     const triggerWord = formData.get("triggerWord") as string;
-    const modelName = formData.get("triggerWord") as string;
+    const modelName = formData.get("modelName") as string;
 
     console.log(
       `Received ${files.length} files and trigger word: "${triggerWord}"`
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
     // Store model information in the database
     console.log("Storing model information in the database");
     await sql`
-      INSERT INTO models (id, user_id, trainingid, model_name, trigger_word)
+      INSERT INTO models (id, user_id, training_id, model_name, trigger_word)
       VALUES (${modelId}, ${userId}, ${training.id}, ${modelName}, ${triggerWord})
     `;
     console.log("Model information stored successfully");

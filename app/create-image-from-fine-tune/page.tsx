@@ -11,7 +11,7 @@ interface Model {
   id: string;
   model_name: string;
   trigger_word: string;
-  trainingid: string;
+  training_id: string;
 }
 
 export default function CreateImage() {
@@ -87,7 +87,7 @@ export default function CreateImage() {
       const response = await fetch("/api/generate-model-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, modelId: model.trainingid }),
+        body: JSON.stringify({ prompt, trainingId: model.training_id }),
       });
 
       if (!response.body) {
