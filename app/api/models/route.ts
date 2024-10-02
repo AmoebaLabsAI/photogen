@@ -11,7 +11,7 @@ export async function GET() {
 
   try {
     const { rows } = await sql`
-      SELECT id, model_name, trigger_word, training_id
+      SELECT id, model_name, trigger_word, training_id, created_at
       FROM models
       WHERE user_id = ${userId}
     `;
