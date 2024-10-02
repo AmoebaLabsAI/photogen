@@ -3,7 +3,7 @@ import ModelCreatedClient from "./ModelCreatedClient";
 
 export default function ModelCreated() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading....</div>}>
       <ModelCreatedClient />
     </Suspense>
   );
