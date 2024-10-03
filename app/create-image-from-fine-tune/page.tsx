@@ -153,7 +153,7 @@ export default function CreateImage() {
 
   const getSubscriptionLimit = (tier: string | null) => {
     switch (tier) {
-      case "pro":
+      case "premium":
         return Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
       case "basic":
         return Number(
@@ -225,19 +225,19 @@ export default function CreateImage() {
                 {getSubscriptionLimit(subscriptionTier)} images.
               </p>
               <p className="text-white mt-2">
-                {subscriptionTier === "pro"
+                {subscriptionTier === "premium"
                   ? "You've used all your pro plan generations."
                   : subscriptionTier === "basic"
                   ? "Upgrade to Pro for more generations!"
-                  : "Upgrade to Basic or Pro for more generations!"}
+                  : "Upgrade to Basic or Premium for more generations!"}
               </p>
-              {subscriptionTier !== "pro" && (
+              {subscriptionTier !== "premium" && (
                 <button
                   onClick={() => router.push("/index#subscribe")}
                   className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
                 >
                   {subscriptionTier === "basic"
-                    ? "Upgrade To Pro"
+                    ? "Upgrade To Premium"
                     : "Upgrade Plan"}
                 </button>
               )}

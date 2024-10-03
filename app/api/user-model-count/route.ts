@@ -24,7 +24,7 @@ export async function GET() {
 
     let limit = 0;
 
-    if (subscription_tier === "pro") {
+    if (subscription_tier === "premium") {
       limit = Number(process.env.NEXT_PUBLIC_PRO_PLAN_MODEL_CREATION_LIMIT);
     } else if (subscription_tier === "basic") {
       limit = Number(process.env.NEXT_PUBLIC_BASIC_PLAN_MODEL_CREATION_LIMIT);
@@ -81,7 +81,7 @@ export async function POST() {
 
     let limit = 0;
 
-    if (subscription_tier === "pro") {
+    if (subscription_tier === "premium") {
       limit = Number(process.env.NEXT_PUBLIC_PRO_PLAN_MODEL_CREATION_LIMIT);
     } else if (subscription_tier === "basic") {
       limit = Number(process.env.NEXT_PUBLIC_BASIC_PLAN_MODEL_CREATION_LIMIT);

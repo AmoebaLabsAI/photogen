@@ -24,7 +24,7 @@ export async function GET() {
 
     let limit = 0;
 
-    if (subscription_tier === "pro") {
+    if (subscription_tier === "premium") {
       limit = Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
     }
 
@@ -85,7 +85,7 @@ export async function POST() {
 
     let limit = 0;
 
-    if (subscription_tier === "pro") {
+    if (subscription_tier === "premium") {
       limit = Number(process.env.NEXT_PUBLIC_PRO_PLAN_IMAGE_GENERATION_LIMIT);
     }
 
