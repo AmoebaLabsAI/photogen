@@ -115,7 +115,7 @@ export default function CreateAIModel() {
 
   const getSubscriptionLimit = (tier: string | null) => {
     switch (tier) {
-      case "pro":
+      case "premium":
         return Number(process.env.NEXT_PUBLIC_PRO_PLAN_MODEL_CREATION_LIMIT);
       case "basic":
         return Number(process.env.NEXT_PUBLIC_BASIC_PLAN_MODEL_CREATION_LIMIT);
@@ -204,19 +204,19 @@ export default function CreateAIModel() {
                 {getSubscriptionLimit(subscriptionTier)} models.
               </p>
               <p className="text-white mt-2">
-                {subscriptionTier === "pro"
-                  ? "You've used all your pro plan model creations."
+                {subscriptionTier === "premium"
+                  ? "You've used all your premium plan model creations."
                   : subscriptionTier === "basic"
-                  ? "Upgrade to Pro for more model creations!"
-                  : "Upgrade to Basic or Pro for more model creations!"}
+                  ? "Upgrade to Premium for more model creations!"
+                  : "Upgrade to Basic or Premium for more model creations!"}
               </p>
-              {subscriptionTier !== "pro" && (
+              {subscriptionTier !== "premium" && (
                 <button
                   onClick={() => router.push("/index#subscribe")}
                   className="mt-4 inline-block px-4 py-2 bg-white text-purple-600 rounded-lg font-semibold"
                 >
                   {subscriptionTier === "basic"
-                    ? "Upgrade To Pro"
+                    ? "Upgrade To Premium"
                     : "Upgrade Plan"}
                 </button>
               )}

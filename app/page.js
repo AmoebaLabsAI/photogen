@@ -14,6 +14,7 @@ const SubscriptionPlan = ({
   link,
   userId,
   userEmail,
+  yearly,
 }) => {
   // Append user metadata to the payment link
   const paymentLinkWithMetadata = `${link}?client_reference_id=${userId}&prefilled_email=${encodeURIComponent(
@@ -25,7 +26,7 @@ const SubscriptionPlan = ({
       <h3 className="text-lg font-bold mb-1">{title}</h3>
       <p className="text-xl font-bold mb-2">
         ${price}
-        <span className="text-xs font-normal">/mo</span>
+        <span className="text-xs font-normal">{yearly ? "" : "/mo"}</span>
       </p>
       <Link
         href={paymentLinkWithMetadata}
@@ -210,23 +211,41 @@ export default function LandingPage() {
             {/* Subscription plan cards */}
             <SubscriptionPlan
               title="Basic Plan"
-              price={99}
+              price={9.99}
               features={["100 AI Photos/mo", "1 AI Model", "Basic editing"]}
-              link="https://buy.stripe.com/4gwg0DfAaeNta889AB"
+              link="https://buy.stripe.com/bIYaGjds25cTdkk8wy"
               userId={user?.id}
               userEmail={userEmail}
             />
             <SubscriptionPlan
-              title="Pro Plan"
-              price={199}
+              title="Basic Plan (billed yearly)"
+              price={109.99}
+              features={["100 AI Photos/mo", "1 AI Model", "Basic editing"]}
+              link="https://buy.stripe.com/4gw9Cf3RseNt2FGaEH"
+              userId={user?.id}
+              userEmail={userEmail}
+              yearly
+            />
+            <SubscriptionPlan
+              title="Premium Plan"
+              price={19.99}
+              features={["100 AI Photos/mo", "1 AI Model", "Basic editing"]}
+              link="https://buy.stripe.com/eVag0DafQ7l1fss8wB"
+              userId={user?.id}
+              userEmail={userEmail}
+            />
+            <SubscriptionPlan
+              title="Premium Plan (billed yearly)"
+              price={199.99}
               features={[
                 "1,000 AI Photos/mo",
                 "3 AI Models",
                 "Advanced editing",
               ]}
-              link="https://buy.stripe.com/aEUeWz1JkfRxfss144"
+              link="https://buy.stripe.com/5kA6q3afQfRx0xy3cg"
               userId={user?.id}
               userEmail={userEmail}
+              yearly
             />
           </div>
         </div>

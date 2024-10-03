@@ -66,12 +66,12 @@ export async function POST(req: Request) {
     }
 
     // Determine the subscription tier based on the product name
-    // This logic assumes that the product name contains either "pro" or "basic"
+    // This logic assumes that the product name contains either "premium" or "basic"
     let subscriptionTier = "free";
     if (session.line_items && session.line_items.data.length > 0) {
       const productName = session.line_items.data[0].description?.toLowerCase();
-      if (productName?.includes("pro")) {
-        subscriptionTier = "pro";
+      if (productName?.includes("premium")) {
+        subscriptionTier = "premium";
       } else if (productName?.includes("basic")) {
         subscriptionTier = "basic";
       }
@@ -138,6 +138,70 @@ export async function POST(req: Request) {
       console.error("Error updating subscription:", error);
       return NextResponse.json(
         { error: "Error updating subscription" },
+        { status: 500 }
+      );
+    }
+  }
+
+  // Handle the 'customer.subscription.deleted' event
+  if (event.type === "customer.subscription.deleted") {
+    const subscription = event.data.object as Stripe.Subscription;
+    const stripeCustomerId = subscription.customer as string;
+
+    try {
+      // Find the user in the database based on the Stripe customer ID
+      const result = await sql`
+        SELECT user_id, email FROM subscriptions WHERE stripe_customer_id = ${stripeCustomerId}
+      `;
+
+      if (result.rows.length === 0) {
+        console.error(
+          "No user found with Stripe customer ID:",
+          stripeCustomerId
+        );
+        return NextResponse.json(
+          { error: "No matching user found" },
+          { status: 400 }
+        );
+      }
+
+      const user = result.rows[0];
+
+      // Update the subscription information in the database
+      await sql`
+        UPDATE subscriptions
+        SET subscription_status = 'canceled',
+            subscription_tier = 'free',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ${user.user_id}
+      `;
+
+      // Update the user's subscription tier in Clerk's privateMetadata
+      try {
+        await clerkClient.users.updateUser(user.user_id, {
+          privateMetadata: {
+            subscription_tier: "free",
+          },
+        });
+        console.log(`Updated Clerk metadata for user ${user.user_id}`);
+      } catch (clerkError) {
+        console.error("Error updating Clerk metadata:", clerkError);
+      }
+
+      // Update the user's subscription tier in the users table
+      await sql`
+        UPDATE users
+        SET subscription_tier = 'free'
+        WHERE id = ${user.user_id}
+      `;
+
+      console.log(
+        `Subscription canceled for user with ID: ${user.user_id}, Email: ${user.email}, Tier reverted to: free`
+      );
+    } catch (error) {
+      console.error("Error updating subscription cancellation:", error);
+      return NextResponse.json(
+        { error: "Error updating subscription cancellation" },
         { status: 500 }
       );
     }
