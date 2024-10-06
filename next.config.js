@@ -1,9 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: {
-    domains: ['your-domain.com'], // or ['localhost'] for local development
-    unoptimized: true,
+  webpack: (config, { isServer }) => {
+    // Ignore the replicate library's require warnings
+    config.module.rules.push({
+      test: /replicate\/lib\/util\.js/,
+      use: 'null-loader',
+    });
+
+    return config;
   },
 }
 

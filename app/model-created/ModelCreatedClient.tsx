@@ -4,6 +4,12 @@ import { useSearchParams } from "next/navigation";
 
 export default function ModelCreatedClient() {
   const searchParams = useSearchParams();
+
+  if (!searchParams) {
+    // Handle the case when searchParams is null
+    return <div className="text-center text-red-500">Invalid parameters.</div>;
+  }
+
   const modelName = searchParams.get("modelName");
   const triggerWord = searchParams.get("triggerWord");
   const trainingId = searchParams.get("trainingID");

@@ -2,57 +2,94 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scroll Animations */
 @keyframes scrollDown {
-  0% { transform: translateY(-20%); }
+  0% { transform: translateY(-50%); }
   100% { transform: translateY(0); }
 }
 
 @keyframes scrollUp {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-20%); }
+  100% { transform: translateY(-50%); }
 }
 
 .animate-scroll-down {
-  animation: scrollDown 60s linear infinite;
+  animation: scrollDown 720s linear infinite; /* Changed from 480s to 720s */
 }
 
 .animate-scroll-up {
-  animation: scrollUp 60s linear infinite;
+  animation: scrollUp 720s linear infinite; /* Changed from 480s to 720s */
 }
 
-@keyframes flip {
-  0% { transform: perspective(400px) rotateY(0); }
-  100% { transform: perspective(400px) rotateY(180deg); }
+/* Glow Animation */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.5);
+  }
 }
 
-.flip {
-  animation: flip 5s;
-  transform-style: preserve-3d;
+.shadow-glow {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.3);
 }
 
-input {
-  @apply border;
-  @apply border-solid;
-  @apply border-gray-300;
-  /* @apply rounded-md; */
-  @apply px-4;
-  @apply py-2;
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }
 
-.border-hairline {
-  @apply border border-black border-opacity-10;
-}
-
-.button {
-  @apply bg-black text-white rounded-r-md inline-block px-5 py-3;
-}
-
-.image-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+/* Image Grid Container */
+.image-grid-container {
+  overflow: hidden;
   position: relative;
+  z-index: 2; /* Adjusted to be above the background grid */
 }
 
-.shadow-text {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+/* Background Image Grid */
+.background-image-grid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Content Sections */
+.bg-opacity-80 {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Image Columns */
+.image-column {
+  will-change: transform;
+}
+
+/* Hover effect for individual images */
+.image-column .group:hover {
+  z-index: 10;
+}
+
+.image-column .group:hover img {
+  filter: brightness(1.2);
+}
+
+/* Ensure that images are on top when hovered */
+.image-column:hover img {
+  z-index: 2;
+}
+
+/* Static Image Grid Specific Styles */
+.static-image-grid {
+  background-color: #f9f9f9; /* Light background for visibility */
+}
+
+.static-image-grid h2 {
+  margin-bottom: 2rem;
+}
+
+.static-image-grid .grid {
+  /* Optional: Adjust grid gap or columns if needed */
 }

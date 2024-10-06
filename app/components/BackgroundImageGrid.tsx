@@ -1,29 +1,38 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
 const BackgroundImageGrid = () => {
-  const images = [
-    "/images/1.webp",
-    "/images/2.webp",
-    "/images/3.webp",
-    "/images/4.webp",
-    "/images/5.webp",
-    "/images/6.webp",
-  ];
+  const [images, setImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch('/api/images');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const imageList: string[] = await response.json();
+        setImages(imageList);
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   return (
-    <div className="grid grid-cols-3 grid-rows-2 gap-4 w-full h-full p-4">
+    <div className="fixed inset-0 z-0 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1 w-full h-full">
       {images.map((src, index) => (
-        <div key={index} className="relative w-full h-full bg-red-500">
-          {" "}
-          {/* Added bg-red-500 */}
+        <div key={index} className="relative w-full h-full">
           <Image
             src={src}
             alt={`Background ${index + 1}`}
             fill
-            sizes="(max-width: 768px) 33vw, 25vw"
+            sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             style={{ objectFit: "cover" }}
-            className="opacity-50"
           />
         </div>
       ))}
