@@ -123,30 +123,36 @@ export default function LandingPage() {
         {/* Old Way vs New Way Comparison Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold mb-8 text-black">The Old Way vs The New Way with Photogen</h2>
+            <h2 className="text-3xl font-bold mb-8 text-black">Content Creation is Changing...don't get left behind!</h2>
             <div className="flex flex-col md:flex-row items-stretch space-y-8 md:space-y-0 md:space-x-8">
               {/* Old Way */}
-              <div className="md:w-1/2 bg-gray-100 p-6 rounded-lg flex flex-col items-center">
-                <div className="w-full h-48 bg-gray-300 mb-4 flex items-center justify-center">
-                  {/* Image Placeholder */}
-                  <span className="text-gray-500">[Old Way Image]</span>
+              <div className="md:w-1/2 bg-gray-100 p-6 rounded-lg flex flex-col items-center border-2 border-gray-300">
+                <div className="w-full h-48 mb-4 flex items-center justify-center">
+                  <Image 
+                    src="/images/old.jpg" 
+                    alt="Traditional Photography" 
+                    width={300} 
+                    height={200} 
+                    objectFit="cover"
+                    className="grayscale" // Add this line
+                  />
                 </div>
                 <h3 className="text-2xl font-bold mb-2 text-black">The Old Way</h3>
                 <h4 className="text-xl mb-2 text-black">Traditional Photography</h4>
                 <p className="text-md mb-4 text-black">
-                  Time-consuming and expensive processes
+                  Time-consuming, expensive, and resource-intensive
                 </p>
                 <ul className="list-disc list-inside marker:text-3xl text-center text-black space-y-4 text-xl flex-grow">
-                  <li>Expensive equipment costs</li>
-                  <li>Professional photographer fees</li>
-                  <li>Lengthy setup and editing times</li>
+                  <li>Specific location needed</li>
+                  <li>Large crew required</li>
+                  <li>Expensive equipment</li>
+                  <li>Time-consuming setup and editing</li>
                 </ul>
               </div>
               {/* New Way */}
-              <div className="md:w-1/2 bg-gray-100 p-6 rounded-lg flex flex-col items-center">
-                <div className="w-full h-48 bg-gray-300 mb-4 flex items-center justify-center">
-                  {/* Image Placeholder */}
-                  <span className="text-gray-500">[New Way Image]</span>
+              <div className="md:w-1/2 bg-gray-100 p-6 rounded-lg flex flex-col items-center border-2 border-blue-500">
+                <div className="w-full h-48 mb-4 flex items-center justify-center">
+                  <Image src="/images/new.jpg" alt="AI-Powered Photography" width={300} height={200} objectFit="cover" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2 text-black">
                   The New Way with Photogen
@@ -156,9 +162,10 @@ export default function LandingPage() {
                   Fast, affordable, and high-quality visuals
                 </p>
                 <ul className="list-disc list-inside marker:text-3xl text-center text-black space-y-4 text-xl flex-grow">
-                  <li>Create images instantly</li>
-                  <li>Low-cost AI models</li>
-                  <li>No equipment or experience needed</li>
+                  <li>Create images anywhere</li>
+                  <li>One person, one laptop</li>
+                  <li>No expensive equipment needed</li>
+                  <li>World-class results in minutes</li>
                 </ul>
               </div>
             </div>
@@ -218,6 +225,72 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold mb-2 text-black">Create Amazing Images</h3>
                 <p className="text-black">Use your custom AI model to generate incredible images of yourself.</p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="py-16 bg-white">
+          <div className="container mx-auto px-6">
+            <h2 className="text-3xl font-bold mb-8 text-black text-center">Choose Your Plan</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <SubscriptionPlan
+                title="Basic Monthly"
+                price="9.99"
+                features={[
+                  "100 AI-generated images per month",
+                  "Basic editing tools",
+                  "Email support"
+                ]}
+                link="https://buy.stripe.com/bIYaGjds25cTdkk8wy"
+                userId={user?.id}
+                userEmail={userEmail}
+                yearly={false}
+                className="transform scale-105 shadow-xl border-2 border-blue-500"
+              />
+              <SubscriptionPlan
+                title="Basic Yearly"
+                price="99.99"
+                features={[
+                  "100 AI-generated images per month",
+                  "Basic editing tools",
+                  "Email support",
+                  "Save 17% compared to monthly"
+                ]}
+                link="https://buy.stripe.com/4gw9Cf3RseNt2FGaEH"
+                userId={user?.id}
+                userEmail={userEmail}
+                yearly={true}
+              />
+              <SubscriptionPlan
+                title="Premium Monthly"
+                price="19.99"
+                features={[
+                  "500 AI-generated images per month",
+                  "Advanced editing tools",
+                  "Priority email support",
+                  "Custom AI model training"
+                ]}
+                link="https://buy.stripe.com/eVag0DafQ7l1fss8wB"
+                userId={user?.id}
+                userEmail={userEmail}
+                yearly={false}
+              />
+              <SubscriptionPlan
+                title="Premium Yearly"
+                price="199.99"
+                features={[
+                  "500 AI-generated images per month",
+                  "Advanced editing tools",
+                  "Priority email support",
+                  "Custom AI model training",
+                  "Save 17% compared to monthly"
+                ]}
+                link="https://buy.stripe.com/5kA6q3afQfRx0xy3cg"
+                userId={user?.id}
+                userEmail={userEmail}
+                yearly={true}
+              />
             </div>
           </div>
         </section>

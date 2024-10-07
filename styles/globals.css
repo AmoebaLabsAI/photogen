@@ -93,3 +93,7 @@
 .static-image-grid .grid {
   /* Optional: Adjust grid gap or columns if needed */
 }
+
+.grayscale {
+  filter: grayscale(100%);
+}

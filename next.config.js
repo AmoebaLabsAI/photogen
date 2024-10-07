@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
-    // Ignore the replicate library's require warnings
+    // Add a rule to handle the replicate library
     config.module.rules.push({
-      test: /replicate\/lib\/util\.js/,
-      use: 'null-loader',
+      test: /node_modules\/replicate/,
+      loader: 'ignore-loader'
     });
 
     return config;
