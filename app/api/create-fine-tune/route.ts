@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { v4 as uuidv4 } from "uuid";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { sql } from "@vercel/postgres";
+import JSZip from 'jszip';  // Add this import
 
 export async function POST(request: Request) {
   const Replicate = (await import('replicate')).default;

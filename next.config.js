@@ -8,6 +8,10 @@ const nextConfig = {
         fs: false,
       };
     }
+    // Add this section to ignore the warning
+    config.ignoreWarnings = [
+      { module: /node_modules\/replicate/ },
+    ];
     return config;
   },
 };

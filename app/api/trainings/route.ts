@@ -1,12 +1,13 @@
-import Replicate from "replicate";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+
+const Replicate = require('replicate');
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// Replace the generic handler with a named export for the GET method
-export const GET = async (request: NextRequest) => {
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const trainingID = searchParams.get("trainingID");
 
@@ -30,4 +31,9 @@ export const GET = async (request: NextRequest) => {
       { status: 500 }
     );
   }
-};
+}
+
+export async function POST(request: Request) {
+  // Your POST logic here
+  // ...
+}
