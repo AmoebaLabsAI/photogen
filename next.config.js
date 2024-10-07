@@ -1,14 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   webpack: (config, { isServer }) => {
-    // Add a rule to handle the replicate library
-    config.module.rules.push({
-      test: /node_modules\/replicate/,
-      loader: 'ignore-loader'
-    });
-
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
     return config;
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

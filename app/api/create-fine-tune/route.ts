@@ -1,28 +1,27 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { v4 as uuidv4 } from "uuid";
-import Replicate from "replicate";
-import JSZip from "jszip";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { sql } from "@vercel/postgres";
 
-const replicate = new Replicate({
-  auth: process.env.REPLICATE_API_TOKEN,
-});
+export async function POST(request: Request) {
+  const Replicate = (await import('replicate')).default;
+  const replicate = new Replicate({
+    auth: process.env.REPLICATE_API_TOKEN,
+  });
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+  const s3Client = new S3Client({
+    region: process.env.AWS_REGION!,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+  });
 
-const OWNER = "amoebalabsai";
-const TRAINING_VERSION =
-  "885394e6a31c6f349dd4f9e6e7ffbabd8d9840ab2559ab78aed6b2451ab2cfef";
+  const OWNER = "amoebalabsai";
+  const TRAINING_VERSION =
+    "885394e6a31c6f349dd4f9e6e7ffbabd8d9840ab2559ab78aed6b2451ab2cfef";
 
-export async function POST(req: Request) {
   console.log("Starting POST request processing");
   const { userId } = auth();
   if (!userId) {
@@ -32,7 +31,7 @@ export async function POST(req: Request) {
 
   try {
     console.log("Parsing form data");
-    const formData = await req.formData();
+    const formData = await request.formData();
     const files = formData.getAll("images") as File[];
     const triggerWord = formData.get("triggerWord") as string;
     const modelName = formData.get("modelName") as string;
