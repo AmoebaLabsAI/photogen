@@ -16,9 +16,8 @@ const SubscriptionPlan = ({
   userId,
   userEmail,
   yearly,
-  className, // Added className prop for custom styling
+  className,
 }) => {
-  // Append user metadata to the payment link
   const paymentLinkWithMetadata = `${link}?client_reference_id=${userId}&prefilled_email=${encodeURIComponent(
     userEmail
   )}`;
@@ -28,17 +27,17 @@ const SubscriptionPlan = ({
       <h3 className="text-xl font-bold mb-2 text-center">{title}</h3>
       <p className="text-2xl font-bold mb-4 text-center">
         ${price}
-        <span className="text-sm font-normal">{yearly ? "" : "/mo"}</span>
+        <span className="text-sm font-normal">{yearly ? "/year" : "/mo"}</span>
       </p>
       <Link
         href={paymentLinkWithMetadata}
-        className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-6 rounded-full transition-colors duration-200 inline-block"
+        className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-6 rounded-full transition-colors duration-200 inline-block mb-4 w-full text-center"
       >
         Subscribe →
       </Link>
-      <ul className="text-center space-y-2 text-base">
+      <ul className="text-left space-y-2 text-sm">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center justify-center">
+          <li key={index} className="flex items-start">
             <span className="text-green-500 mr-2 text-lg">✓</span>
             <span>{feature}</span>
           </li>
@@ -51,6 +50,7 @@ const SubscriptionPlan = ({
 export default function LandingPage() {
   const { user, isLoaded } = useUser();
   const [mounted, setMounted] = useState(false);
+  const [pricingPeriod, setPricingPeriod] = useState('monthly');
 
   useEffect(() => {
     setMounted(true);
@@ -59,6 +59,91 @@ export default function LandingPage() {
   if (!mounted || !isLoaded) return null;
 
   const userEmail = user?.primaryEmailAddress?.emailAddress || "";
+
+  const plans = [
+    {
+      title: "Starter Plan",
+      monthlyPrice: "19",
+      yearlyPrice: "114",
+      features: [
+        "Take 100 AI Photos (credits)",
+        "Create 1 AI Model per month",
+        "Stable Diffusion: worse legacy model",
+        "Take 1 photo at a time",
+        "Use any photo pack",
+        "For personal use only",
+        "Watermarked photos"
+      ],
+      link: "https://buy.stripe.com/starter_plan_link"
+    },
+    {
+      title: "Pro Plan",
+      monthlyPrice: "39",
+      yearlyPrice: "234",
+      features: [
+        "Take 1,000 AI Photos (credits)",
+        "Create 3 AI Models per month",
+        "Flux™: new photorealistic model",
+        "For each model you get:",
+        "8x free profile pics",
+        "8x free professional headshots",
+        "8x free dating app photos",
+        "8x free outfit ideas",
+        "8x free social media posts",
+        "All Starter features, plus:",
+        "Take up to 4 photos in parallel",
+        "Write your own prompts",
+        "Copy any photo",
+        "Commercial use license"
+      ],
+      link: "https://buy.stripe.com/pro_plan_link"
+    },
+    {
+      title: "Premium Plan",
+      monthlyPrice: "99",
+      yearlyPrice: "594",
+      features: [
+        "Take 3,000 AI Photos (credits)",
+        "Create 10 AI Models per month",
+        "Flux™: new photorealistic model",
+        "For each model you get:",
+        "8x free profile pics",
+        "8x free professional headshots",
+        "8x free dating app photos",
+        "8x free outfit ideas",
+        "8x free social media posts",
+        "All Pro features, plus:",
+        "Take up to 8 photos in parallel",
+        "Use the magic photo editor",
+        "Try on clothes",
+        "Make videos from photos",
+        "Access to the community chat",
+        "Early access to new features"
+      ],
+      link: "https://buy.stripe.com/premium_plan_link"
+    },
+    {
+      title: "Business Plan",
+      monthlyPrice: "299",
+      yearlyPrice: "1794",
+      features: [
+        "Take 10,000 AI Photos (credits)",
+        "Create 50 AI Models per month",
+        "Flux™: new photorealistic model",
+        "For each model you get:",
+        "8x free profile pics",
+        "8x free professional headshots",
+        "8x free dating app photos",
+        "8x free outfit ideas",
+        "8x free social media posts",
+        "All Premium features, plus:",
+        "Take up to 16 photos in parallel",
+        "Unlimited photo storage",
+        "Priority: faster response times"
+      ],
+      link: "https://buy.stripe.com/business_plan_link"
+    }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -233,65 +318,50 @@ export default function LandingPage() {
         <section id="pricing" className="py-16 bg-white">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl font-bold mb-8 text-black text-center">Choose Your Plan</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <SubscriptionPlan
-                title="Basic Monthly"
-                price="9.99"
-                features={[
-                  "100 AI-generated images per month",
-                  "Basic editing tools",
-                  "Email support"
-                ]}
-                link="https://buy.stripe.com/bIYaGjds25cTdkk8wy"
-                userId={user?.id}
-                userEmail={userEmail}
-                yearly={false}
-                className="transform scale-105 shadow-xl border-2 border-blue-500"
-              />
-              <SubscriptionPlan
-                title="Basic Yearly"
-                price="99.99"
-                features={[
-                  "100 AI-generated images per month",
-                  "Basic editing tools",
-                  "Email support",
-                  "Save 17% compared to monthly"
-                ]}
-                link="https://buy.stripe.com/4gw9Cf3RseNt2FGaEH"
-                userId={user?.id}
-                userEmail={userEmail}
-                yearly={true}
-              />
-              <SubscriptionPlan
-                title="Premium Monthly"
-                price="19.99"
-                features={[
-                  "500 AI-generated images per month",
-                  "Advanced editing tools",
-                  "Priority email support",
-                  "Custom AI model training"
-                ]}
-                link="https://buy.stripe.com/eVag0DafQ7l1fss8wB"
-                userId={user?.id}
-                userEmail={userEmail}
-                yearly={false}
-              />
-              <SubscriptionPlan
-                title="Premium Yearly"
-                price="199.99"
-                features={[
-                  "500 AI-generated images per month",
-                  "Advanced editing tools",
-                  "Priority email support",
-                  "Custom AI model training",
-                  "Save 17% compared to monthly"
-                ]}
-                link="https://buy.stripe.com/5kA6q3afQfRx0xy3cg"
-                userId={user?.id}
-                userEmail={userEmail}
-                yearly={true}
-              />
+            
+            {/* Pricing period toggle */}
+            <div className="flex justify-center mb-8">
+              <button
+                className={`px-4 py-2 rounded-l-lg ${pricingPeriod === 'monthly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => setPricingPeriod('monthly')}
+              >
+                Monthly
+              </button>
+              <button
+                className={`px-4 py-2 rounded-r-lg ${pricingPeriod === 'yearly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => setPricingPeriod('yearly')}
+              >
+                Yearly (6+ months free)
+              </button>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {plans.map((plan, index) => (
+                <SubscriptionPlan
+                  key={index}
+                  title={plan.title}
+                  price={pricingPeriod === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
+                  features={plan.features}
+                  link={plan.link}
+                  userId={user?.id}
+                  userEmail={userEmail}
+                  yearly={pricingPeriod === 'yearly'}
+                  className={index === 1 ? "transform scale-105 shadow-xl border-2 border-blue-500" : ""}
+                />
+              ))}
+            </div>
+            
+            <p className="text-center mt-8 text-gray-600">
+              {pricingPeriod === 'monthly' ? (
+                <button onClick={() => setPricingPeriod('yearly')} className="text-blue-500 hover:underline">
+                  Save with yearly (6+ months free) ↗
+                </button>
+              ) : (
+                <button onClick={() => setPricingPeriod('monthly')} className="text-blue-500 hover:underline">
+                  View monthly billing options ↗
+                </button>
+              )}
+            </p>
           </div>
         </section>
 
