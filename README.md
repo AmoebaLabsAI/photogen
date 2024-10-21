@@ -11,6 +11,71 @@ Photogen is an open-source AI image generation website. It allows users to creat
 - Replicate for image model APIs
 - Vercel for deployment
 
+## App Setup and Information Flow
+
+1. User Authentication: Clerk handles user authentication and management.
+2. Image Generation: Users can generate images using various AI models through Replicate's API.
+3. Model Fine-tuning: Users can create custom AI models based on their own images.
+4. Subscription Management: Stripe handles subscriptions and payments.
+5. Image Storage: Generated images are stored in Amazon S3.
+6. Database: User data, subscriptions, and image metadata are stored in Postgres.
+
+## API Routes
+
+### `/api/clerk-webhook`
+
+- Method: POST
+- Description: Handles Clerk webhooks for user creation events.
+- Parameters: None (Webhook payload is processed)
+
+### `/api/stripe-webhooks`
+
+- Method: POST
+- Description: Handles Stripe webhooks for subscription events.
+- Parameters: None (Webhook payload is processed)
+
+### `/api/create-fine-tune`
+
+- Method: POST
+- Description: Initiates the creation of a fine-tuned AI model.
+- Parameters:
+  - `images`: Array of image files
+  - `triggerWord`: String
+  - `modelName`: String
+
+### `/api/generate-model-image`
+
+- Method: POST
+- Description: Generates an image using a fine-tuned model.
+- Parameters:
+  - `prompt`: String
+  - `trainingId`: String
+
+### `/api/user-image-count`
+
+- Method: GET
+- Description: Retrieves the user's image generation count and limit.
+- Parameters: None
+
+### `/api/user-model-count`
+
+- Method: GET
+- Description: Retrieves the user's model creation count and limit.
+- Parameters: None
+
+### `/api/models`
+
+- Method: GET
+- Description: Retrieves the user's created models.
+- Parameters: None
+
+### `/api/delete-model`
+
+- Method: DELETE
+- Description: Deletes a user's created model.
+- Parameters:
+  - `model_name`: String
+
 ## Environment Variables Setup
 
 In order to clone this repo, you will need to setup several environment variables. These can be obtained by signing up for the relevant services.
@@ -21,7 +86,6 @@ In order to clone this repo, you will need to setup several environment variable
 - AWS_SECRET_ACCESS_KEY
 - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 - CLERK_SECRET_KEY
-- CLERK_ENCRYPTION_KEY="89a0d42c0213662e98c113771eb2ab71d0b01943a99ab7352c27dbcce5edc55e"
 - NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 - NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 - NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
@@ -35,10 +99,10 @@ In order to clone this repo, you will need to setup several environment variable
 - POSTGRES_PASSWORD
 - POSTGRES_DATABASE
 - STRIPE_SECRET_KEY
-- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_hix4y0kxYKyS8nKKfFUtu7DJ00HRoWMDZN"
-- STRIPE_PRO_PRICE_ID="price_1PzYdqB1PoOPhnz87ZsgFJIb"
-- STRIPE_BASIC_PRICE_ID="price_1PzYdqB1PoOPhnz87ZsgFJIb"
-- STRIPE_WEBHOOK_SECRET="whsec_HDUBD08d124onIKmavskAxRXIpqxN1zS"
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- STRIPE_PRO_PRICE_ID
+- STRIPE_BASIC_PRICE_ID
+- STRIPE_WEBHOOK_SECRET
 - WEBHOOK_SECRET (from stripe)
 - PRO_PLAN_IMAGE_GENERATION_LIMIT
 - BASIC_PLAN_IMAGE_GENERATION_LIMIT
@@ -46,49 +110,39 @@ In order to clone this repo, you will need to setup several environment variable
 
 ## SQL Setup
 
-Create the following tables in your database
-
-```sql
--- Create users table
+Create the following tables in your database:
+sql
+-- Users table
 CREATE TABLE users (
-    id TEXT PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    first_name TEXT,
-    last_name TEXT,
-    image_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    subscription_tier TEXT DEFAULT 'free'
+id SERIAL PRIMARY KEY,
+clerk_id TEXT UNIQUE NOT NULL,
+email TEXT UNIQUE NOT NULL,
+subscription_tier TEXT NOT NULL DEFAULT 'free',
+image_count INTEGER NOT NULL DEFAULT 0,
+model_count INTEGER NOT NULL DEFAULT 0,
+created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- Create subscriptions table
-CREATE TABLE subscriptions (
-    id SERIAL PRIMARY KEY,
-    user_id TEXT UNIQUE REFERENCES users(id),
-    email TEXT NOT NULL,
-    subscription_status TEXT NOT NULL,
-    stripe_customer_id TEXT,
-    stripe_subscription_id TEXT,
-    subscription_tier TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- Models table
+CREATE TABLE models (
+id SERIAL PRIMARY KEY,
+user_id INTEGER REFERENCES users(id),
+model_name TEXT NOT NULL,
+trigger_word TEXT NOT NULL,
+training_id TEXT UNIQUE NOT NULL,
+status TEXT NOT NULL,
+created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- Create user_image_counts table
-CREATE TABLE user_image_counts (
-    user_id TEXT PRIMARY KEY REFERENCES users(id),
-    image_count INTEGER DEFAULT 0
-);
-
--- Create images table
+-- Images table
 CREATE TABLE images (
-    id SERIAL PRIMARY KEY,
-    user_id TEXT REFERENCES users(id),
-    image_url TEXT NOT NULL,
-    s3_url TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+id SERIAL PRIMARY KEY,
+user_id INTEGER REFERENCES users(id),
+model_id INTEGER REFERENCES models(id),
+prompt TEXT NOT NULL,
+image_url TEXT NOT NULL,
+created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-```
 
 ## Noteworthy files
 
